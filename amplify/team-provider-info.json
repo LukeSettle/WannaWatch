@@ -1,0 +1,15 @@
+{
+  "dev": {
+    "awscloudformation": {
+      "AuthRoleName": "amplify-wannawatch-dev-161703-authRole",
+      "UnauthRoleArn": "arn:aws:iam::402650935982:role/amplify-wannawatch-dev-161703-unauthRole",
+      "AuthRoleArn": "arn:aws:iam::402650935982:role/amplify-wannawatch-dev-161703-authRole",
+      "Region": "us-east-1",
+      "DeploymentBucketName": "amplify-wannawatch-dev-161703-deployment",
+      "UnauthRoleName": "amplify-wannawatch-dev-161703-unauthRole",
+      "StackName": "amplify-wannawatch-dev-161703",
+      "StackId": "arn:aws:cloudformation:us-east-1:402650935982:stack/amplify-wannawatch-dev-161703/6c3b2510-2075-11eb-99e9-0e7b8fbdd9d7",
+      "AmplifyAppId": "d3gbpjv1cfnuqi"
+    }
+  }
+}

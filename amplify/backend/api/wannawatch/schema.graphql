@@ -1,0 +1,23 @@
+type Match @model {
+  id: ID!
+  movieIds: [String]
+  searchReference: String
+  users: [User]
+}
+
+type LikedMovieIds @model {
+  id: ID!
+  movieIds: [String]
+  searchReference: String!
+  user: User!
+  match: Match
+}
+
+type User @model {
+  id: ID!
+  email: String!
+  externalId: String
+  username: String
+  matches: [Match]
+  likedMovieIds: [LikedMovieIds]
+}

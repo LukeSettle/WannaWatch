@@ -1,5 +1,8 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+import Amplify, { API, graphqlOperation } from 'aws-amplify';
+import awsconfig from '../../../aws-exports';
+import { createLikedMovieIds } from '../../../graphql/mutations';
 import {
   Button,
   Dimensions,
@@ -11,7 +14,12 @@ import {
 import Movie from "./Movie";
 import colors from "../../../config/colors";
 
+Amplify.configure(awsconfig);
+
 const { width, height } = Dimensions.get("window");
+const pageSize = 8;
+const url = "https://apis.justwatch.com/content/titles/en_US/popular";
+const providers = ["nfx","hbm","hlu"];
 
 const MatchScreen = ({}) => {
   const [movies, setMovies] = useState(null);
@@ -20,22 +28,43 @@ const MatchScreen = ({}) => {
 
   const options = {
     method: "GET",
-    url: "https://apis.justwatch.com/content/titles/en_US/popular",
+    url: url,
     params: {
       body: {
         fields:["cinema_release_date", "full_path", "full_paths", "id", "localized_release_date", "object_type", "poster", "scoring", "title", "tmdb_popularity", "offers"],
-        providers:["nfx","hbm","hlu"],
-        enable_provider_filter:false,
-        monetization_types:[],
+        providers: providers,
+        enable_provider_filter: false,
+        monetization_types: [],
         page: page,
-        page_size: 8,
+        page_size: pageSize,
         matching_offers_only: true
       },
     },
   };
 
+  const saveLikedMovieIdsRecord = async (likedMovieIds) => {
+    const likedMovieIdsRecord = {
+      movieIds: likedMovieIds,
+      searchReference: `${url}?page=${page}&page_size=${pageSize}&providers=${providers.join(',')}`,
+      user: {
+        id: '1234',
+        email: 'lukewestonsettle@gmail.com',
+        username: 'lwsettle96',
+        createdAt:
+      }
+    }
+
+    console.log('likedMovieIdsRecord', likedMovieIdsRecord);
+
+    try {
+      const response = await API.graphql(graphqlOperation(createLikedMovieIds, { input: likedMovieIdsRecord }));
+      console.log('response', response);
+    } catch (e) {
+      console.log('Error', e);
+    }
+  }
+
   const getMovies = async () => {
-    console.log('getMovies');
     try {
       const response = await axios.request(options);
       const json = await response.data.items;
@@ -79,6 +108,8 @@ const MatchScreen = ({}) => {
         movie.liked === true
       ))
     )
+
+    saveLikedMovieIdsRecord(likedMovies.map(movie => movie.id.toString()))
 
     return (
       <View styles={styles.container}>

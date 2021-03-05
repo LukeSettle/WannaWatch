@@ -82,8 +82,6 @@ const Movie = ({ movie, setUpdateMovieParams, simple }) => {
     );
   };
 
-  console.log('simple', `${movie.title} ${simple}`);
-
   if (simple) {
     return (
       <SafeAreaView style={styles.card}>
