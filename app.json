@@ -5,10 +5,7 @@
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./app/assets/icon.png",
-    "platforms": [
-      "android",
-      "ios"
-    ],
+    "platforms": ["android", "ios", "web"],
     "splash": {
       "image": "./app/assets/splash.png",
       "resizeMode": "contain",
@@ -17,9 +14,7 @@
     "updates": {
       "fallbackToCacheTimeout": 0
     },
-    "assetBundlePatterns": [
-      "**/*"
-    ],
+    "assetBundlePatterns": ["**/*"],
     "ios": {
       "supportsTablet": true
     },
