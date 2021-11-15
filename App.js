@@ -6,8 +6,11 @@ import { useAsyncStorage } from "@react-native-async-storage/async-storage";
 import WelcomeScreen from "./app/screens/welcome/WelcomeScreen";
 import MatchScreen from "./app/screens/match/MatchScreen";
 import LoginScreen from "./app/screens/user/LoginScreen";
+import SignUpScreen from "./app/screens/user/SignUpScreen";
 import { NavigationContainer } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
+import { UserContext } from "./app/contexts/UserContext";
+import { RAILS_API_URL } from "@env";
 
 const Stack = createStackNavigator();
 
@@ -29,10 +32,9 @@ export default function App() {
   useEffect(() => {
     readItemFromStorage();
 
-    console.log("token", token);
     if (token) {
       axios
-        .get("http://localhost:3000/user", {
+        .get(`${RAILS_API_URL}/user`, {
           headers: { Authorization: token },
         })
         .then((response) => {
@@ -44,18 +46,20 @@ export default function App() {
     } else {
       setUser(null);
     }
-    console.log("Current User", user);
   }, [token]);
 
   return (
-    <NavigationContainer>
-      <Stack.Navigator initialRouteName={"Login"}>
-        <Stack.Screen name="Welcome" component={WelcomeScreen} />
-        <Stack.Screen name="Match" component={MatchScreen} />
-        <Stack.Screen name="Login" component={LoginScreen} />
-      </Stack.Navigator>
-      <StatusBar style="auto" />
-    </NavigationContainer>
+    <UserContext.Provider value={user}>
+      <NavigationContainer>
+        <Stack.Navigator initialRouteName={"Welcome"}>
+          <Stack.Screen name="Welcome" component={WelcomeScreen} />
+          <Stack.Screen name="Match" component={MatchScreen} />
+          <Stack.Screen name="Login" component={LoginScreen} />
+          <Stack.Screen name="SignUp" component={SignUpScreen} />
+        </Stack.Navigator>
+        <StatusBar style="auto" />
+      </NavigationContainer>
+    </UserContext.Provider>
   );
 }
 

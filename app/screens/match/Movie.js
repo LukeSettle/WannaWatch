@@ -1,6 +1,6 @@
 /* @flow weak */
 
-import React, { useState } from 'react';
+import React, { useState } from "react";
 import {
   View,
   Text,
@@ -9,10 +9,13 @@ import {
   Dimensions,
   SafeAreaView,
   Platform,
-} from 'react-native';
-import Interactable from 'react-native-interactable-reanimated'
+} from "react-native";
+import Interactable from "react-native-interactable-reanimated";
 import Animated, {
-  Value, interpolate, concat, Extrapolate,
+  Value,
+  interpolate,
+  concat,
+  Extrapolate,
 } from "react-native-reanimated";
 import colors from "../../../config/colors";
 
@@ -34,7 +37,7 @@ const Movie = ({ movie, setUpdateMovieParams, simple }) => {
       outputRange: [α, -1 * α],
       extrapolate: Extrapolate.CLAMP,
     }),
-    "rad",
+    "rad"
   );
 
   const translateX = x;
@@ -47,19 +50,15 @@ const Movie = ({ movie, setUpdateMovieParams, simple }) => {
   });
 
   const nopeOpacity = interpolate(x, {
-    inputRange: [-1 * deltaX / 4, 0],
+    inputRange: [(-1 * deltaX) / 4, 0],
     outputRange: [1, 0],
     extrapolate: Extrapolate.CLAMP,
   });
 
   const style = {
     ...StyleSheet.absoluteFillObject,
-    transform: [
-      { translateX },
-      { translateY },
-      { rotateZ },
-    ],
-  }
+    transform: [{ translateX }, { translateY }, { rotateZ }],
+  };
 
   const onSnap = ({ nativeEvent: { x } }) => {
     if (x !== 0) {
@@ -67,7 +66,7 @@ const Movie = ({ movie, setUpdateMovieParams, simple }) => {
       const movieParams = { id: movie.id, liked: x > 0 };
       setUpdateMovieParams(movieParams);
     }
-  }
+  };
 
   const imageSource = () => {
     const titleAsParam = movie.full_path.split("/").slice(-1)[0];
@@ -75,21 +74,19 @@ const Movie = ({ movie, setUpdateMovieParams, simple }) => {
     posterArray.pop();
     const posterString = posterArray.join("/");
 
-    return(
-      {
-        uri: `https://images.justwatch.com${posterString}/s332/${titleAsParam}`
-      }
-    );
+    return {
+      uri: `https://images.justwatch.com${posterString}/s332/${titleAsParam}`,
+    };
   };
 
-  console.log('simple', `${movie.title} ${simple}`);
+  console.log("simple", `${movie.title} ${simple}`);
 
   if (simple) {
     return (
       <SafeAreaView style={styles.card}>
         <Image style={styles.poster} source={imageSource()} />
       </SafeAreaView>
-    )
+    );
   }
 
   return (
@@ -104,17 +101,29 @@ const Movie = ({ movie, setUpdateMovieParams, simple }) => {
         <Animated.View {...{ style }}>
           <Image style={styles.poster} source={imageSource()} />
           <View style={styles.buttonsWrapper}>
-            <Animated.View style={[styles.buttonContainer, styles.likeButton, { opacity: likeOpacity }]}>
+            <Animated.View
+              style={[
+                styles.buttonContainer,
+                styles.likeButton,
+                { opacity: likeOpacity },
+              ]}
+            >
               <Text style={styles.likeText}>Like</Text>
             </Animated.View>
-            <Animated.View style={[styles.buttonContainer, styles.nopeButton, { opacity: nopeOpacity }]}>
+            <Animated.View
+              style={[
+                styles.buttonContainer,
+                styles.nopeButton,
+                { opacity: nopeOpacity },
+              ]}
+            >
               <Text style={styles.nopeText}>Nope</Text>
             </Animated.View>
           </View>
         </Animated.View>
       </Interactable.View>
     </SafeAreaView>
-  )
+  );
 };
 
 export default Movie;
@@ -134,7 +143,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-around",
     marginTop: 30,
     height: "30%",
-    padding: 20
+    padding: 20,
   },
   buttonContainer: {
     width: "50%",
@@ -154,11 +163,11 @@ const styles = StyleSheet.create({
   likeText: {
     color: "white",
     fontSize: 30,
-    fontFamily: Platform.OS === "ios" ? "Baskerville-SemiBoldItalic": "serif"
+    fontFamily: Platform.OS === "ios" ? "Baskerville-SemiBoldItalic" : "serif",
   },
   nopeText: {
     color: "white",
     fontSize: 30,
-    fontFamily: Platform.OS === "ios" ? "Baskerville-SemiBoldItalic": "serif"
-  }
+    fontFamily: Platform.OS === "ios" ? "Baskerville-SemiBoldItalic" : "serif",
+  },
 });

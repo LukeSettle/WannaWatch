@@ -13,13 +13,14 @@ const LoginScreen = ({ navigation }) => {
   const writeItemToStorage = async (newValue) => {
     await setItem(newValue);
   };
+  console.log("API URL", RAILS_API_URL);
 
   const handleSubmit = (values) => {
     Keyboard.dismiss();
     axios({
       headers: { "Access-Control-Allow-Origin": "*" },
       method: "post",
-      url: `${RAILS_API_URL}/users/sign_in`,
+      url: `${RAILS_API_URL}/users`,
       data: {
         user: {
           email: values.username,
@@ -32,7 +33,7 @@ const LoginScreen = ({ navigation }) => {
         navigation.navigate("Match");
       })
       .catch((error) => {
-        setError(error.response.data.error);
+        setError(error);
       });
   };
 
