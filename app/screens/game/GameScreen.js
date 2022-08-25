@@ -14,7 +14,7 @@ const GameScreen = ({ navigation }) => {
 
   const options = {
     method: "GET",
-    url: "https://apis.justwatch.com/content/titles/en_US/popular",
+    url: "https://api.themoviedb.org/3/discover/movie?api_key=27c571472904897e90b202471ab2eacc",
     params: {
       body: {
         fields: [
@@ -55,8 +55,7 @@ const GameScreen = ({ navigation }) => {
       },
     })
       .then((response) => {
-        console.log("response", response.data);
-        // navigation.navigate("Match", { gameId: response.data.game.id });
+        navigation.navigate("Match", { game: response.data, page });
       })
       .catch((error) => {
         setError(error.response.data.error);

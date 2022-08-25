@@ -34,15 +34,11 @@ export default function App() {
     readItemFromStorage();
 
     if (token) {
+      axios.defaults.baseURL = Constants.manifest.extra.RAILS_API_URL;
+      axios.defaults.headers.common['Authorization'] = token;
       axios
-        .get(`${Constants.manifest.extra.RAILS_API_URL}/user`, {
-          headers: {
-            Authorization: token,
-          },
-        })
+        .get(`/user`)
         .then((response) => {
-          console.log("response", response);
-          console.log("userasjldfkj", response);
           setUser(response.data.user);
         })
         .catch(() => {

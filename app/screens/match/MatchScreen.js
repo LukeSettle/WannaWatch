@@ -13,15 +13,31 @@ import colors from "../../../config/colors";
 
 const { width, height } = Dimensions.get("window");
 
-const MatchScreen = ({}) => {
-  const [movies, setMovies] = useState(null);
+const MatchScreen = ({ route }) => {
+  const [movies, setMovies] = useState([]);
   const [updateMovieParams, setUpdateMovieParams] = useState(null);
+  const [page, setPage] = useState(route.params.page);
+  const [filteredMovies, setFilteredMovies] = useState([]);
+  const [likedMovies, setLikedMovies] = useState([]);
+  
+  const options = () => {
+    const parsedOptions = JSON.parse(route.params.game.query);
+    return {
+      ...parsedOptions,
+      params: {
+        ...parsedOptions.params,
+        body: {
+          ...parsedOptions.params.body,
+          page
+        }
+      }
+    }
+  }
 
   const getMovies = async () => {
-    console.log("getMoviesasdfasdf");
     try {
-      const response = await axios.request(options);
-      const json = await response.data.items;
+      const response = await axios.request(options());
+      const json = await response.data.results
       setMovies(json);
     } catch (error) {
       console.log(error);
@@ -47,15 +63,16 @@ const MatchScreen = ({}) => {
     getMovies();
   }, [page]);
 
-  if (!movies) {
+  useEffect(() => {
+    setLikedMovies(movies.filter((movie) => movie.liked === true))
+    setFilteredMovies(movies.filter((movie) => movie.hidden !== true));
+  }, [movies])
+
+  if (movies.length === 0) {
     return null;
   }
 
-  const filteredMovies = movies.filter((movie) => movie.hidden !== true);
-
   if (filteredMovies.length === 0) {
-    const likedMovies = movies.filter((movie) => movie.liked === true);
-
     return (
       <View styles={styles.container}>
         <Button

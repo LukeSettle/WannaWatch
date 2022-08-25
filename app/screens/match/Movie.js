@@ -1,6 +1,6 @@
 /* @flow weak */
 
-import React, { useState } from "react";
+import React from "react";
 import {
   View,
   Text,
@@ -13,7 +13,7 @@ import {
 import Interactable from "react-native-interactable-reanimated";
 import Animated, {
   Value,
-  interpolate,
+  interpolateNode,
   concat,
   Extrapolate,
 } from "react-native-reanimated";
@@ -32,7 +32,7 @@ const Movie = ({ movie, setUpdateMovieParams, simple }) => {
   const y = new Value(0);
 
   const rotateZ = concat(
-    interpolate(x, {
+    interpolateNode(x, {
       inputRange: [-1 * deltaX, deltaX],
       outputRange: [α, -1 * α],
       extrapolate: Extrapolate.CLAMP,
@@ -43,13 +43,13 @@ const Movie = ({ movie, setUpdateMovieParams, simple }) => {
   const translateX = x;
   const translateY = y;
 
-  const likeOpacity = interpolate(x, {
+  const likeOpacity = interpolateNode(x, {
     inputRange: [0, deltaX / 4],
     outputRange: [0, 1],
     extrapolate: Extrapolate.CLAMP,
   });
 
-  const nopeOpacity = interpolate(x, {
+  const nopeOpacity = interpolateNode(x, {
     inputRange: [(-1 * deltaX) / 4, 0],
     outputRange: [1, 0],
     extrapolate: Extrapolate.CLAMP,
@@ -69,17 +69,10 @@ const Movie = ({ movie, setUpdateMovieParams, simple }) => {
   };
 
   const imageSource = () => {
-    const titleAsParam = movie.full_path.split("/").slice(-1)[0];
-    let posterArray = movie.poster.split("/");
-    posterArray.pop();
-    const posterString = posterArray.join("/");
-
     return {
-      uri: `https://images.justwatch.com${posterString}/s332/${titleAsParam}`,
+      uri: `https://image.tmdb.org/t/p/original/${movie.poster_path}`,
     };
   };
-
-  console.log("simple", `${movie.title} ${simple}`);
 
   if (simple) {
     return (
@@ -94,7 +87,7 @@ const Movie = ({ movie, setUpdateMovieParams, simple }) => {
       <Interactable.View
         key={movie.id}
         style={StyleSheet.absoluteFillObject}
-        snapPoints={[{ x: -1 * A }, { x: 0 }, { x: A }]}
+        snapPoints={[{ x: -1 * (A / 5) }, { x: 0 }, { x: A / 5 }]}
         animatedValueX={x}
         {...{ onSnap, x, y }}
       >
