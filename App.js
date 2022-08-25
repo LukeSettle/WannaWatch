@@ -4,13 +4,14 @@ import axios from "axios";
 import { StyleSheet, Text, View, TouchableOpacity } from "react-native";
 import { useAsyncStorage } from "@react-native-async-storage/async-storage";
 import WelcomeScreen from "./app/screens/welcome/WelcomeScreen";
+import GameScreen from "./app/screens/game/GameScreen";
 import MatchScreen from "./app/screens/match/MatchScreen";
 import LoginScreen from "./app/screens/user/LoginScreen";
 import SignUpScreen from "./app/screens/user/SignUpScreen";
 import { NavigationContainer } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
 import { UserContext } from "./app/contexts/UserContext";
-import { RAILS_API_URL } from "@env";
+import Constants from "expo-constants";
 
 const Stack = createStackNavigator();
 
@@ -34,10 +35,14 @@ export default function App() {
 
     if (token) {
       axios
-        .get(`${RAILS_API_URL}/user`, {
-          headers: { Authorization: token },
+        .get(`${Constants.manifest.extra.RAILS_API_URL}/user`, {
+          headers: {
+            Authorization: token,
+          },
         })
         .then((response) => {
+          console.log("response", response);
+          console.log("userasjldfkj", response);
           setUser(response.data.user);
         })
         .catch(() => {
@@ -53,6 +58,7 @@ export default function App() {
       <NavigationContainer>
         <Stack.Navigator initialRouteName={"Welcome"}>
           <Stack.Screen name="Welcome" component={WelcomeScreen} />
+          <Stack.Screen name="Game" component={GameScreen} />
           <Stack.Screen name="Match" component={MatchScreen} />
           <Stack.Screen name="Login" component={LoginScreen} />
           <Stack.Screen name="SignUp" component={SignUpScreen} />

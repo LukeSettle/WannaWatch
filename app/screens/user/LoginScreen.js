@@ -3,7 +3,7 @@ import { Button, TextInput, View, StyleSheet, Keyboard } from "react-native";
 import { Formik } from "formik";
 import axios from "axios";
 import { useAsyncStorage } from "@react-native-async-storage/async-storage";
-import { RAILS_API_URL } from "@env";
+import Constants from "expo-constants";
 import Error from "../../components/shared/Error";
 
 const LoginScreen = ({ navigation }) => {
@@ -19,7 +19,7 @@ const LoginScreen = ({ navigation }) => {
     axios({
       headers: { "Access-Control-Allow-Origin": "*" },
       method: "post",
-      url: `${RAILS_API_URL}/users/sign_in`,
+      url: `${Constants.manifest.extra.RAILS_API_URL}/users/sign_in`,
       data: {
         user: {
           email: values.username,
@@ -28,8 +28,9 @@ const LoginScreen = ({ navigation }) => {
       },
     })
       .then((response) => {
-        writeItemToStorage(response.headers.authorization);
-        navigation.navigate("Match");
+        console.log("response", response);
+        writeItemToStorage(response);
+        navigation.navigate("Game");
       })
       .catch((error) => {
         setError(error.response.data.error);

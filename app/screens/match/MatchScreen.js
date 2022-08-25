@@ -16,38 +16,9 @@ const { width, height } = Dimensions.get("window");
 const MatchScreen = ({}) => {
   const [movies, setMovies] = useState(null);
   const [updateMovieParams, setUpdateMovieParams] = useState(null);
-  const [page, setPage] = useState(Math.round(Math.random() * (66 - 1) + 1));
-
-  const options = {
-    method: "GET",
-    url: "https://apis.justwatch.com/content/titles/en_US/popular",
-    params: {
-      body: {
-        fields: [
-          "cinema_release_date",
-          "full_path",
-          "full_paths",
-          "id",
-          "localized_release_date",
-          "object_type",
-          "poster",
-          "scoring",
-          "title",
-          "tmdb_popularity",
-          "offers",
-        ],
-        providers: ["nfx", "hbm", "hlu"],
-        enable_provider_filter: false,
-        monetization_types: [],
-        page: page,
-        page_size: 8,
-        matching_offers_only: true,
-      },
-    },
-  };
 
   const getMovies = async () => {
-    console.log("getMovies");
+    console.log("getMoviesasdfasdf");
     try {
       const response = await axios.request(options);
       const json = await response.data.items;

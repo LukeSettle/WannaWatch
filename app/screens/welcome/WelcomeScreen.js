@@ -19,7 +19,7 @@ const WelcomeScreen = ({ navigation }) => {
       return (
         <Pressable
           style={styles.buttonBase}
-          onPress={() => navigation.navigate("Match")}
+          onPress={() => navigation.navigate("Game")}
         >
           <Text style={styles.text}>Press to start matching</Text>
         </Pressable>
