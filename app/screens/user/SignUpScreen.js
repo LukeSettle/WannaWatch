@@ -19,7 +19,7 @@ const LoginScreen = ({ navigation }) => {
     axios({
       headers: { "Access-Control-Allow-Origin": "*" },
       method: "post",
-      url: `${Constants.manifest.extra.RAILS_API_URL}/users`,
+      url: `${Constants.manifest.extra.API_URL}/users/register`,
       data: {
         user: {
           email: values.username,
@@ -28,11 +28,12 @@ const LoginScreen = ({ navigation }) => {
       },
     })
       .then((response) => {
+        console.log("response", response);
         writeItemToStorage(response.data);
         navigation.navigate("Game");
       })
       .catch((error) => {
-        // console.log("error", error);
+        console.log("error", error);
         // setError(error);
       });
   };

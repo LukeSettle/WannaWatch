@@ -25,7 +25,8 @@
       }
     },
     "extra": {
-      "RAILS_API_URL": "https://7a6f-74-133-238-103.ngrok.io"
+      "API_URL": "https://e65a-162-247-54-167.ngrok.io",
+      "WEBSOCKET_URL": "wss://e65a-162-247-54-167.ngrok.io"
     },
     "description": "WannaWatch helps you and your significant other choose what to watch on date night! "
   }

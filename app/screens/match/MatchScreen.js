@@ -19,9 +19,9 @@ const MatchScreen = ({ route }) => {
   const [page, setPage] = useState(route.params.page);
   const [filteredMovies, setFilteredMovies] = useState([]);
   const [likedMovies, setLikedMovies] = useState([]);
-  
+
   const options = () => {
-    const parsedOptions = JSON.parse(route.params.game.query);
+    const parsedOptions = JSON.parse(route.params.game.data.query);
     return {
       ...parsedOptions,
       params: {
@@ -47,9 +47,6 @@ const MatchScreen = ({ route }) => {
   useEffect(() => {
     if (!updateMovieParams) return;
 
-    const movieToUpdate = movies.find(
-      (movie) => movie.id == updateMovieParams.id
-    );
     const updatedMovies = movies.map((movie) =>
       movie.id === updateMovieParams.id
         ? { ...movie, liked: updateMovieParams.liked, hidden: true }
