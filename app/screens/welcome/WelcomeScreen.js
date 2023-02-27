@@ -1,10 +1,13 @@
 import { StatusBar } from "expo-status-bar";
 import React, { useContext } from "react";
+import { Formik } from "formik";
 import {
+  Button,
   StyleSheet,
   Text,
-  Pressable,
   View,
+  Pressable,
+  TextInput,
   ImageBackground,
 } from "react-native";
 import colors from "../../../config/colors";
@@ -14,32 +17,60 @@ const WelcomeScreen = ({ navigation }) => {
   const user = useContext(UserContext);
   const image = require("../../assets/theater.jpg");
 
+  const handleSubmit = (values) => {
+    axios({
+      headers: { "Access-Control-Allow-Origin": "*" },
+      method: "put",
+      url: `${Constants.manifest.extra.API_URL}/users`,
+      data: {
+        user: {
+          device_id: deviceId,
+          display_name: values.display_name,
+        },
+      },
+    })
+      .then((response) => {
+        setUser(response.data.data);
+      })
+      .catch((error) => {
+        console.log("error", error)
+        setError(error.response.data.error);
+      });
+  };
+
   const visibleButtons = () => {
     if (user) {
       return (
-        <Pressable
-          style={styles.buttonBase}
-          onPress={() => navigation.navigate("Game")}
+        <Formik
+          initialValues={{
+            display_name: "",
+          }}
+          onSubmit={(values) => handleSubmit(values)}
         >
-          <Text style={styles.text}>Press to start matching</Text>
-        </Pressable>
-      );
-    } else {
-      return (
-        <>
-          <Pressable
-            style={styles.buttonBase}
-            onPress={() => navigation.navigate("Login")}
-          >
-            <Text style={styles.text}>Login</Text>
-          </Pressable>
-          <Pressable
-            style={styles.buttonBase}
-            onPress={() => navigation.navigate("SignUp")}
-          >
-            <Text style={styles.text}>Sign Up</Text>
-          </Pressable>
-        </>
+          {({ handleChange, handleBlur, handleSubmit, values }) => (
+            <View>
+              {!user.display_name && (
+                <View style={styles.inputContainer}>
+                  <TextInput
+                    onChangeText={handleChange("display_name")}
+                    onBlur={handleBlur("display_name")}
+                    placeholder="Enter a name for your friends to see"
+                    placeholderTextColor="#aaa"
+                    value={values.display_name}
+                    style={styles.textInput}
+                  />
+                </View>
+              )}
+              <Pressable
+                style={styles.buttonBase}
+                disabled={!user?.display_name}
+                onPress={handleSubmit}
+              >
+                <Text style={styles.text}>Press to start matching</Text>
+              </Pressable>
+            </View>
+          )}
+        </Formik>
       );
     }
   };
@@ -89,5 +120,12 @@ const styles = StyleSheet.create({
   startButton: {
     backgroundColor: colors.primary,
     color: colors.red,
+  },
+  textInput: {
+    borderColor: "#eee",
+    height: 60,
+    backgroundColor: "#ffffff",
+    paddingLeft: 15,
+    paddingRight: 15,
   },
 });

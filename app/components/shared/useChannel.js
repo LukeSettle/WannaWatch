@@ -1,16 +1,29 @@
 import { useState, useContext, useEffect } from 'react';
+import { Presence } from 'phoenix';
 import { SocketContext } from '../../contexts/SocketContext';
 
 const useChannel = channelName => {
   const [channel, setChannel] = useState();
+  const [presenceList, setPresenceList] = useState([]);
   const { socket } = useContext(SocketContext);
+
+  const setOnlineUsers = presence => {
+    const onlineUsers = presence.list((id, { metas: [first, ...rest] }) => {
+      console.log('id', id);
+      console.log('first', first);
+      console.log('rest', rest);
+      return first;
+    });
+    setPresenceList(onlineUsers);
+  };
 
   useEffect(() => {
     if (!socket) return;
 
-    console.log('socket from hook', socket);
+    const phoenixChannel = socket.channel(channelName, {name: 'test'});
+    const presence = new Presence(phoenixChannel);
 
-    const phoenixChannel = socket.channel(channelName, {});
+    presence.onSync(() => setOnlineUsers(presence))
 
     phoenixChannel.join().receive('ok', () => {
       setChannel(phoenixChannel);
@@ -22,9 +35,7 @@ const useChannel = channelName => {
     };
   }, [socket]);
 
-  console.log('channel from hook', channel);
-
-  return [channel];
+  return [channel, presenceList];
 };
 
 export default useChannel;
