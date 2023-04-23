@@ -5,13 +5,18 @@ import { UserContext } from "../../contexts/UserContext";
 import { SocketProvider } from '../../contexts/SocketContext';
 
 const GameScreen = ({ navigation }) => {
-  const user = useContext(UserContext);
+  const { user } = useContext(UserContext);
   const [game, setGame] = useState(null);
+
+  const startGame = () => {
+    console.log("game", game);
+    navigation.navigate("Match", { game });
+  };
 
   return (
     <SocketProvider>
       {!game && <GameForm setGame={setGame} user={user} />}
-      {game && <Lobby game={game} />}
+      {game && <Lobby game={game} startGame={startGame} />}
     </SocketProvider>
   );
 };

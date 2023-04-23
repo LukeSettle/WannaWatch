@@ -59,7 +59,7 @@ export default function App() {
   }, [deviceId])
 
   return (
-    <UserContext.Provider value={user}>
+    <UserContext.Provider value={{user, setUser}}>
       <NavigationContainer>
         <Stack.Navigator initialRouteName={"Welcome"}>
           <Stack.Screen name="Welcome" component={WelcomeScreen} />

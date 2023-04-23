@@ -9438,10 +9438,10 @@ pbkdf2@^3.0.3:
     safe-buffer "^5.0.1"
     sha.js "^2.4.8"
 
-phoenix@^1.6.16:
-  version "1.6.16"
-  resolved "https://registry.yarnpkg.com/phoenix/-/phoenix-1.6.16.tgz#fd92e87cd0c7cd36a99c6f168beeeb46afde7932"
-  integrity sha512-3vOfu5olbFg6eBNkF4pnwMzNm7unl/4vy24MW+zxKklVgjq1zLnO2EWq9wz6i6r4PbQ0CGxHGtqKJH2VSsnhaA==
+phoenix@^1.7.2:
+  version "1.7.2"
+  resolved "https://registry.yarnpkg.com/phoenix/-/phoenix-1.7.2.tgz#7bee9d5dd6dc3a8b30b94bb5e058375a4063a931"
+  integrity sha512-jwWDOsUNEQZkLNSwzfLJ6AMFUkyZ+ILU+NkBBtoAK020QPpV/dYEQHGMQoFScj89MFjJlLdkE1W97i8S+4FdGg==
 
 picocolors@^0.2.1:
   version "0.2.1"

@@ -1,39 +1,38 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useContext } from "react";
 import { Button, FlatList, Text, View } from "react-native";
+import { UserContext } from "../../contexts/UserContext";
 import useChannel from '../../components/shared/useChannel';
 
-const Lobby = ({ game }) => {
+const Lobby = ({ game, startGame }) => {
   LOAD_GAME_MESSAGE = 'load_game';
-  const [gameChannel, presenceList] = useChannel(`room:${game.entry_code}`);
-
-  console.log('presenceList', presenceList);
+  const { user } = useContext(UserContext);
+  const [gameChannel, presenceList] = useChannel(
+    {
+      channelName: `room:${game.entry_code}`,
+      displayName: user.display_name
+    }
+  );
 
   useEffect(() => {
     if (!gameChannel) return;
 
-    //the LOAD_game_MESSAGE is a message defined by the server
-    const gameChannel = gameChannel.on(LOAD_GAME_MESSAGE, response => {
-      console.log('game channel response', response);
+    gameChannel.on(LOAD_GAME_MESSAGE, response => {
+      startGame();
     });
 
-    // stop listening to this message before the component unmounts
     return () => {
-      gameChannel.off(LOAD_GAME_MESSAGE, gameChannel);
+      gameChannel.off(LOAD_GAME_MESSAGE);
     };
   }, [gameChannel]);
-
-  const startGame = () => {
-    // send a message to the game channel to start the game
-  };
 
   return (
     <View>
       <FlatList
         data={presenceList}
-        renderItem={({ item }) => <Text>{item.online_at}</Text>}
+        renderItem={({ item }) => <Text>{item.display_name}</Text>}
         keyExtractor={item => item.phx_ref}
       />
-      <Button title="Start Game" onPress={() => gameChannel.push(LOAD_GAME_MESSAGE, { userId: user.id })} />
+      <Button title="Start Game" onPress={() => gameChannel.push(LOAD_GAME_MESSAGE, { user_id: user.id })} />
     </View>
   );
 };
