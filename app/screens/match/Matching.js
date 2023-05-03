@@ -11,7 +11,7 @@ import useChannel from '../../components/shared/useChannel';
 
 const FINISH_GAME_MESSAGE = "finish_game";
 
-const Matching = ({ game }) => {
+const Matching = ({ game, newGame }) => {
   const { user } = useContext(UserContext);
   const [movies, setMovies] = useState([]);
   const [updateMovieParams, setUpdateMovieParams] = useState(null);
@@ -111,7 +111,7 @@ const Matching = ({ game }) => {
 
   if (filteredMovies.length === 0) {
     return (
-      <Results matchedMovies={matchedMovies} setPage={setPage} />
+      <Results matchedMovies={matchedMovies} page={page} setPage={setPage} newGame={newGame} />
     );
   }
 

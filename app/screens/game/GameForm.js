@@ -52,7 +52,6 @@ const GameScreen = ({ setGame, user }) => {
       },
     })
       .then((response) => {
-        // navigation.navigate("Match", { game: response.data, page });
         setGame(response.data.data);
       })
       .catch((error) => {
