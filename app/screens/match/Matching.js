@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useState } from "react";
-import axios from "axios";
+
 import {
   View,
   StyleSheet,
@@ -11,12 +11,9 @@ import useChannel from '../../components/shared/useChannel';
 
 const FINISH_GAME_MESSAGE = "finish_game";
 
-const Matching = ({ game, newGame }) => {
+const Matching = ({ game, movies, setMovies }) => {
   const { user } = useContext(UserContext);
-  const [movies, setMovies] = useState([]);
   const [updateMovieParams, setUpdateMovieParams] = useState(null);
-  const [query, _setQuery] = useState(JSON.parse(game.query));
-  const [page, setPage] = useState(query.page);
   const [filteredMovies, setFilteredMovies] = useState([]);
   const [likedMovies, setLikedMovies] = useState([]);
   const [matchedMovies, setMatchedMovies] = useState([]);
@@ -44,33 +41,6 @@ const Matching = ({ game, newGame }) => {
     };
   }, [gameChannel]);
 
-  const options = () => {
-    const parsedOptions = query;
-    return {
-      ...parsedOptions,
-      params: {
-        ...parsedOptions.params,
-        body: {
-          ...parsedOptions.params.body,
-          page
-        }
-      }
-    }
-  }
-
-  const getMovies = async () => {
-    try {
-      const response = await axios.request(options());
-      const json = await response.data.results
-      setMovies(json);
-    } catch (error) {
-      console.log(error);
-    }
-  };
-
-  useEffect(() => {
-    getMovies();
-  }, [page]);
 
   useEffect(() => {
     if (!updateMovieParams) return;
@@ -111,7 +81,7 @@ const Matching = ({ game, newGame }) => {
 
   if (filteredMovies.length === 0) {
     return (
-      <Results matchedMovies={matchedMovies} page={page} setPage={setPage} newGame={newGame} />
+      <Results matchedMovies={matchedMovies} />
     );
   }
 

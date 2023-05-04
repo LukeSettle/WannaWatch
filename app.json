@@ -25,8 +25,8 @@
       }
     },
     "extra": {
-      "API_URL": "https://9571-74-133-228-129.ngrok-free.app",
-      "WEBSOCKET_URL": "wss://9571-74-133-228-129.ngrok-free.app"
+      "API_URL": "https://a2d9-74-133-228-129.ngrok-free.app",
+      "WEBSOCKET_URL": "wss://a2d9-74-133-228-129.ngrok-free.app"
     },
     "description": "WannaWatch helps you and your significant other choose what to watch on date night! "
   }
