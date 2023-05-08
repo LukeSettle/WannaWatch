@@ -1,9 +1,12 @@
 import React, { useContext, useEffect, useState } from "react";
-
 import {
   View,
   StyleSheet,
+  Dimensions,
 } from "react-native";
+const { width, height } = Dimensions.get("window");
+console.log('width', width);
+console.log('height', height);
 import Movie from "./Movie";
 import Results from "./Results";
 import { UserContext } from "../../contexts/UserContext";
@@ -87,7 +90,7 @@ const Matching = ({ game, movies, setMovies }) => {
 
   return (
     <View style={styles.container}>
-      {filteredMovies.map((movie, index) => (
+      {filteredMovies.slice(-3).map((movie, index) => (
         <Movie
           key={movie.id}
           movie={movie}
@@ -104,6 +107,7 @@ export default Matching;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: "center",
+    alignSelf: "center",
+    borderWidth: 5,
   },
 });
