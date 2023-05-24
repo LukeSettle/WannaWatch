@@ -52,11 +52,10 @@ const GameScreen = ({ setGame, user }) => {
       },
     })
       .then((response) => {
-        // navigation.navigate("Match", { game: response.data, page });
         setGame(response.data.data);
       })
       .catch((error) => {
-        setError(error.response.data.error);
+        setError("Please enter a valid code")
       });
   };
 

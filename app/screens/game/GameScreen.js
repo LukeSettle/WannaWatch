@@ -9,7 +9,6 @@ const GameScreen = ({ navigation }) => {
   const [game, setGame] = useState(null);
 
   const startGame = () => {
-    console.log("game", game);
     navigation.navigate("Match", { game });
   };
 
