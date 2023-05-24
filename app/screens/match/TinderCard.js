@@ -7,7 +7,7 @@ const { height, width } = Dimensions.get('window')
 const settings = {
   maxTilt: 25, // in deg
   rotationPower: 50,
-  swipeThreshold: 1 // need to update this threshold for RN (1.5 seems reasonable...?)
+  swipeThreshold: 1.5 // need to update this threshold for RN (1.5 seems reasonable...?)
 }
 
 // physical properties of the spring
@@ -219,7 +219,7 @@ const TinderCard = React.forwardRef(
             style={[
               styles.buttonContainer,
               styles.likeButton,
-              { opacity: 1 },
+              { opacity: x.to((x) => (x < 0 ? 0 : x / swipeThreshold)) },
             ]}
           >
             <Text style={styles.likeText}>Like</Text>
@@ -228,7 +228,7 @@ const TinderCard = React.forwardRef(
             style={[
               styles.buttonContainer,
               styles.nopeButton,
-              { opacity: 1 },
+              { opacity: x.to((x) => (x > 0 ? 0 : -x / swipeThreshold)) },
             ]}
           >
             <Text style={styles.nopeText}>Nope</Text>
@@ -243,15 +243,16 @@ const styles = StyleSheet.create({
   buttonsWrapper: {
     position: "absolute",
     flexDirection: "row",
-    width: "80%",
     justifyContent: "space-around",
+    width: "100%",
+    marginTop: 10,
   },
   buttonContainer: {
-    width: "50%",
     height: undefined,
     justifyContent: "center",
     alignItems: "center",
     borderRadius: 10,
+    padding: 10,
   },
   likeButton: {
     backgroundColor: colors.quaternary,

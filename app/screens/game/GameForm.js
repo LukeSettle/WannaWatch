@@ -55,7 +55,7 @@ const GameScreen = ({ setGame, user }) => {
         setGame(response.data.data);
       })
       .catch((error) => {
-        setError(error.response.data.error);
+        setError("Please enter a valid code")
       });
   };
 

@@ -8,10 +8,10 @@ const { width, height } = Dimensions.get("window");
 
 const Movie = ({ movie, setUpdateMovieParams }) => {
   const onSwipe = (direction) => {
-    if ('left') {
-      setUpdateMovieParams({ id: movie.id, liked: true });
-    } else if ('right') {
+    if (direction == 'left') {
       setUpdateMovieParams({ id: movie.id, liked: false });
+    } else if (direction == 'right') {
+      setUpdateMovieParams({ id: movie.id, liked: true });
     }
   };
 
@@ -41,13 +41,12 @@ export default Movie;
 
 const styles = StyleSheet.create({
   poster: {
-    ...StyleSheet.absoluteFillObject,
+    position: "absolute",
+    alignSelf: "center",
     width: width * 0.9,
     height: height * 0.6,
     borderRadius: 30,
     backgroundColor: colors.primary,
     overflow: "hidden",
-    borderWidth: 5,
-    borderColor: "pink",
   },
 });

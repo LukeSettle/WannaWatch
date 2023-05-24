@@ -90,12 +90,11 @@ const Matching = ({ game, movies, setMovies }) => {
 
   return (
     <View style={styles.container}>
-      {filteredMovies.slice(-3).map((movie, index) => (
+      {filteredMovies.slice(-2).map((movie, index) => (
         <Movie
           key={movie.id}
           movie={movie}
           setUpdateMovieParams={setUpdateMovieParams}
-          simple={index !== filteredMovies.length - 1}
         />
       ))}
     </View>
@@ -106,8 +105,7 @@ export default Matching;
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    alignSelf: "center",
-    borderWidth: 5,
+    flex: 0.7,
+    flexDirection: 'column',
   },
 });
