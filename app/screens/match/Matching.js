@@ -11,6 +11,7 @@ import Movie from "./Movie";
 import Results from "./Results";
 import { UserContext } from "../../contexts/UserContext";
 import useChannel from '../../components/shared/useChannel';
+import Ionicons from '@expo/vector-icons/Ionicons';
 
 const FINISH_GAME_MESSAGE = "finish_game";
 
@@ -26,6 +27,14 @@ const Matching = ({ game, movies, setMovies }) => {
       displayName: user.display_name
     }
   );
+
+  const nopeCurrentMovie = () => {
+    setUpdateMovieParams({ id: filteredMovies.slice(-1)[0].id, liked: false });
+  };
+
+  const likeCurrentMovie = () => {
+    setUpdateMovieParams({ id: filteredMovies.slice(-1)[0].id, liked: true });
+  };
 
   useEffect(() => {
     if (!gameChannel) return;
@@ -89,14 +98,20 @@ const Matching = ({ game, movies, setMovies }) => {
   }
 
   return (
-    <View style={styles.container}>
-      {filteredMovies.slice(-2).map((movie, index) => (
-        <Movie
-          key={movie.id}
-          movie={movie}
-          setUpdateMovieParams={setUpdateMovieParams}
-        />
-      ))}
+    <View style={styles.outer_container}>
+      <View style={styles.container}>
+        {filteredMovies.slice(-2).map((movie, index) => (
+          <Movie
+            key={movie.id}
+            movie={movie}
+            setUpdateMovieParams={setUpdateMovieParams}
+          />
+        ))}
+      </View>
+      <View style={styles.directions}>
+        <Ionicons onPress={nopeCurrentMovie} name="arrow-back" size={32} color="red" />
+        <Ionicons onPress={likeCurrentMovie} name="arrow-forward" size={32} color="green" />
+      </View>
     </View>
   );
 };
@@ -104,8 +119,21 @@ const Matching = ({ game, movies, setMovies }) => {
 export default Matching;
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 0.7,
+  outer_container: {
+    flex: 1,
     flexDirection: 'column',
+    justifyContent: 'space-between',
+  },
+  container: {
+    flex: 1,
+    flexDirection: 'column',
+    marginTop: '20%',
+  },
+  directions: {
+    flex: 0.2,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginLeft: '20%',
+    marginRight: '20%',
   },
 });
