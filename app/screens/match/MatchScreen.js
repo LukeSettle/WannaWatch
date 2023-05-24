@@ -7,7 +7,6 @@ const MatchScreen = ({ navigation, route }) => {
   const [game, _setGame] = useState(route.params.game);
   const [query, _setQuery] = useState(JSON.parse(game.query));
   const [movies, setMovies] = useState([]);
-  const [page, _setPage] = useState(query.page);
 
   const options = () => {
     const parsedOptions = query;
@@ -17,7 +16,7 @@ const MatchScreen = ({ navigation, route }) => {
         ...parsedOptions.params,
         body: {
           ...parsedOptions.params.body,
-          page
+          page: query.params.body.page
         }
       }
     }
@@ -25,6 +24,7 @@ const MatchScreen = ({ navigation, route }) => {
 
   const getMovies = async () => {
     try {
+      console.log('options', options());
       const response = await axios.request(options());
       const json = await response.data.results
       setMovies(json);
@@ -35,7 +35,7 @@ const MatchScreen = ({ navigation, route }) => {
 
   useEffect(() => {
     getMovies();
-  }, [page]);
+  }, []);
 
   const newGame = () => {
     navigation.navigate("Game");
