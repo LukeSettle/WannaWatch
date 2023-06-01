@@ -1,6 +1,5 @@
 import React, { useContext } from "react";
 
-import axios from "axios";
 import { StatusBar } from "expo-status-bar";
 import { Formik } from "formik";
 import {
@@ -12,7 +11,7 @@ import {
   TextInput,
   ImageBackground,
 } from "react-native";
-import Constants from "expo-constants";
+import { upsertUser } from "../../data/cosmo_client";
 import colors from "../../../config/colors";
 import { UserContext } from "../../contexts/UserContext";
 
@@ -21,24 +20,20 @@ const WelcomeScreen = ({ navigation }) => {
   const image = require("../../assets/theater.jpg");
 
   const submitForm = (values) => {
-    axios({
-      headers: { "Access-Control-Allow-Origin": "*" },
-      method: "put",
-      url: `${Constants.manifest.extra.API_URL}/users`,
-      data: {
-        device_id: user.device_id,
-        user: {
-          display_name: values.display_name,
-        },
-      },
-    })
-      .then((response) => {
-        setUser(response.data.data);
+    console.log("submitting form", values);
+    const userParams = {
+      device_id: user.device_id,
+      display_name: values.display_name,
+    }
+
+    upsertUser(userParams)
+      .then((upsertedUser) => {
+        setUser(upsertedUser);
         navigation.navigate("Game")
       })
       .catch((error) => {
         console.log("error", error)
-        setError(error.response.data.error);
+        setError(error);
       });
   };
 
@@ -51,7 +46,7 @@ const WelcomeScreen = ({ navigation }) => {
           }}
           onSubmit={(values) => submitForm(values)}
         >
-          {({ handleChange, handleBlur, handleSubmit, values }) => (
+          {({ handleChange, handleBlur, submitForm, values }) => (
             <View>
               <View style={styles.inputContainer}>
                 <TextInput
@@ -66,7 +61,7 @@ const WelcomeScreen = ({ navigation }) => {
               <Pressable
                 style={styles.buttonBase}
                 disabled={!values.display_name}
-                onPress={handleSubmit}
+                onPress={submitForm}
               >
                 <Text style={styles.text}>Press to start matching</Text>
               </Pressable>

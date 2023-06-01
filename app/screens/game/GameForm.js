@@ -1,8 +1,7 @@
 import React, { useState } from "react";
 import { Button, TextInput, View, StyleSheet, Keyboard } from "react-native";
 import { Formik } from "formik";
-import axios from "axios";
-import Constants from "expo-constants";
+import { createGame } from "../../data/cosmo_client";
 import Error from "../../components/shared/Error";
 
 const GameScreen = ({ setGame, user }) => {
@@ -39,22 +38,19 @@ const GameScreen = ({ setGame, user }) => {
 
   const handleSubmit = (values) => {
     Keyboard.dismiss();
-    axios({
-      headers: { "Access-Control-Allow-Origin": "*" },
-      method: "post",
-      url: `${Constants.manifest.extra.API_URL}/games`,
-      data: {
-        game: {
-          entry_code: values.entryCode,
-          query: JSON.stringify(options),
-          user_id: user.id,
-        },
-      },
-    })
-      .then((response) => {
-        setGame(response.data.data);
+    const gameParams = {
+      entry_code: values.entryCode,
+      query: JSON.stringify(options),
+      user_id: user.id,
+    }
+
+    console.log(gameParams)
+    createGame(gameParams)
+      .then((game) => {
+        setGame(game);
       })
       .catch((error) => {
+        console.log(error);
         setError("Please enter a valid code")
       });
   };
@@ -68,7 +64,7 @@ const GameScreen = ({ setGame, user }) => {
         }}
         onSubmit={(values) => handleSubmit(values)}
       >
-        {({ handleChange, handleBlur, handleSubmit, values }) => (
+        {({ handleChange, handleBlur, submitForm, values }) => (
           <View>
             <View style={styles.inputContainer}>
               <TextInput
@@ -80,7 +76,7 @@ const GameScreen = ({ setGame, user }) => {
                 style={styles.textInput}
               />
             </View>
-            <Button onPress={handleSubmit} title="Create Game" />
+            <Button onPress={submitForm} title="Create Game" />
           </View>
         )}
       </Formik>

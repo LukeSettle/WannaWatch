@@ -1,6 +1,6 @@
 import { StatusBar } from "expo-status-bar";
 import React, { useEffect, useState } from "react";
-import axios from "axios";
+import "react-native-url-polyfill/auto"
 import { StyleSheet } from "react-native";
 import WelcomeScreen from "./app/screens/welcome/WelcomeScreen";
 import GameScreen from "./app/screens/game/GameScreen";
@@ -11,7 +11,7 @@ import * as SecureStore from 'expo-secure-store';
 import 'react-native-get-random-values';
 import { v4 as uuidv4 } from 'uuid';
 import { UserContext } from "./app/contexts/UserContext";
-import Constants from "expo-constants";
+import { upsertUser } from "./app/data/cosmo_client";
 
 const Stack = createStackNavigator();
 
@@ -36,25 +36,18 @@ export default function App() {
   useEffect(() => {
     if (!deviceId) return;
 
-    axios.defaults.baseURL = Constants.manifest.extra.API_URL;
-    axios.defaults.headers.common['deviceId'] = deviceId;
+    const userParams = {
+      device_id: deviceId,
+    }
 
-    axios({
-      headers: { "Access-Control-Allow-Origin": "*" },
-      method: "post",
-      url: `${Constants.manifest.extra.API_URL}/users`,
-      data: {
-        user: {
-          device_id: deviceId
-        },
-      },
-    })
-      .then((response) => {
-        setUser(response.data.data);
+    upsertUser(userParams)
+      .then(upsertedUser => {
+        console.log('User upserted:', upsertedUser);
+        setUser(upsertedUser)
       })
-      .catch((error) => {
-        console.log("error", error)
-        setError(error.response.data.error);
+      .catch(error => {
+        console.error('Error upserting user:', error);
+        setError(error);
       });
   }, [deviceId])
 
