@@ -8,14 +8,14 @@ const GameScreen = ({ navigation }) => {
   const { user } = useContext(UserContext);
   const [game, setGame] = useState(null);
 
-  const startGame = () => {
+  const startMatching = () => {
     navigation.navigate("Match", { game });
   };
 
   return (
     <SocketProvider>
       {!game && <GameForm setGame={setGame} user={user} />}
-      {game && <Lobby game={game} startGame={startGame} />}
+      {game && <Lobby game={game} startMatching={startMatching} />}
     </SocketProvider>
   );
 };
