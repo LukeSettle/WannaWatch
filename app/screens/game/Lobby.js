@@ -1,41 +1,33 @@
-import React, { useEffect, useContext } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { Button, FlatList, Text, View } from "react-native";
 import { UserContext } from "../../contexts/UserContext";
-import { HubConnectionBuilder } from '@microsoft/signalr';
+import { SocketContext } from "../../contexts/SocketContext";
 
-const Lobby = ({ game, startGame }) => {
+const Lobby = ({ game, serverMessages }) => {
   const { user } = useContext(UserContext);
+  const { webSocket } = useContext(SocketContext);
 
-  useEffect(() => {
-    const connection = new HubConnectionBuilder()
-      .withUrl(`https://wannawatchrealtime.service.signalr.net/${game.id}`)
-      .build();
-
-    connection.on('broadcastMessage', (message) => {
-      // Handle incoming message here
-      console.log('Received message:', message);
-    });
-
-    connection.start()
-      .then(() => {
-        console.log('SignalR connection established.');
-      })
-      .catch((error) => {
-        console.log('Error establishing SignalR connection:', error);
-      });
-  }, []);
+  const sendReadyMessage = () => {
+    webSocket.send(JSON.stringify({ type: 'user', message: 'ready' }));
+  }
 
   return (
     <View>
       <Text>Lobby</Text>
       <Text>Game: {game.id}</Text>
-      <Text>Players:</Text>
-      {/* <FlatList
-        data={presenceList}
+      <Text>Current Players:</Text>
+      <FlatList
+        data={game.players}
         renderItem={({ item }) => <Text>{item.display_name}</Text>}
-        keyExtractor={item => item.phx_ref}
-      /> */}
-      <Button title="Start Game" onPress={() => gameChannel.push(LOAD_GAME_MESSAGE, { user_id: user.id })} />
+        keyExtractor={item => item.id}
+      />
+      <Text>Server Messages:</Text>
+      <FlatList
+        data={serverMessages}
+        renderItem={({ item }) => <Text>{item}</Text>}
+        keyExtractor={item => item}
+      />
+      <Button title="Ready" onPress={sendReadyMessage} />
     </View>
   );
 };

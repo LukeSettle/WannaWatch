@@ -4,7 +4,6 @@ import "react-native-url-polyfill/auto"
 import { StyleSheet } from "react-native";
 import WelcomeScreen from "./app/screens/welcome/WelcomeScreen";
 import GameScreen from "./app/screens/game/GameScreen";
-import MatchScreen from "./app/screens/match/MatchScreen";
 import { NavigationContainer } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
 import * as SecureStore from 'expo-secure-store';
@@ -42,7 +41,6 @@ export default function App() {
 
     upsertUser(userParams)
       .then(upsertedUser => {
-        console.log('User upserted:', upsertedUser);
         setUser(upsertedUser)
       })
       .catch(error => {
@@ -57,7 +55,6 @@ export default function App() {
         <Stack.Navigator initialRouteName={"Welcome"}>
           <Stack.Screen name="Welcome" component={WelcomeScreen} />
           <Stack.Screen name="Game" component={GameScreen} />
-          <Stack.Screen name="Match" component={MatchScreen} />
         </Stack.Navigator>
         <StatusBar style="auto" />
       </NavigationContainer>

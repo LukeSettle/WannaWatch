@@ -5,28 +5,17 @@ import {
   Dimensions,
 } from "react-native";
 const { width, height } = Dimensions.get("window");
-console.log('width', width);
-console.log('height', height);
 import Movie from "./Movie";
-import Results from "./Results";
 import { UserContext } from "../../contexts/UserContext";
-import useChannel from '../../components/shared/useChannel';
+import { SocketContext } from "../../contexts/SocketContext";
 import Ionicons from '@expo/vector-icons/Ionicons';
-
-const FINISH_GAME_MESSAGE = "finish_game";
 
 const Matching = ({ game, movies, setMovies }) => {
   const { user } = useContext(UserContext);
   const [updateMovieParams, setUpdateMovieParams] = useState(null);
-  const [filteredMovies, setFilteredMovies] = useState([]);
+  const [filteredMovies, setFilteredMovies] = useState(null);
   const [likedMovies, setLikedMovies] = useState([]);
-  const [matchedMovies, setMatchedMovies] = useState([]);
-  const [gameChannel, _presenceList] = useChannel(
-    {
-      channelName: `room:${game.entry_code}`,
-      displayName: user.display_name
-    }
-  );
+  const { webSocket } = useContext(SocketContext);
 
   const nopeCurrentMovie = () => {
     setUpdateMovieParams({ id: filteredMovies.slice(-1)[0].id, liked: false });
@@ -35,24 +24,6 @@ const Matching = ({ game, movies, setMovies }) => {
   const likeCurrentMovie = () => {
     setUpdateMovieParams({ id: filteredMovies.slice(-1)[0].id, liked: true });
   };
-
-  useEffect(() => {
-    if (!gameChannel) return;
-
-    gameChannel.on(FINISH_GAME_MESSAGE, response => {
-      console.log('FINISH_GAME_MESSAGE', response);
-      setMatchedMovies(
-        movies.filter((movie) =>
-          response.matched_movie_ids.includes(movie.id)
-        )
-      )
-    });
-
-    return () => {
-      gameChannel.off(FINISH_GAME_MESSAGE);
-    };
-  }, [gameChannel]);
-
 
   useEffect(() => {
     if (!updateMovieParams) return;
@@ -72,35 +43,25 @@ const Matching = ({ game, movies, setMovies }) => {
   }, [movies])
 
   useEffect(() => {
-    if (!gameChannel || filteredMovies.length !== 0) return;
+    if (filteredMovies == null || filteredMovies.length !== 0) return;
 
-    console.log("FINISH_GAME_MESSAGE init");
-    gameChannel.push(
-      FINISH_GAME_MESSAGE,
-      {
-        display_name: user.display_name,
-        game_id: game.id,
-        user_id: user.id,
-        movie_ids: likedMovies.map((movie) => movie.id)
-      }
-    );
+    const message = {
+      type: 'user',
+      message: 'finish_matching',
+      liked_movie_ids: likedMovies.map((movie) => movie.id),
+    };
 
+    webSocket.send(JSON.stringify(message))
   }, [filteredMovies]);
 
   if (movies.length === 0) {
     return null;
   }
 
-  if (filteredMovies.length === 0) {
-    return (
-      <Results matchedMovies={matchedMovies} />
-    );
-  }
-
   return (
     <View style={styles.outer_container}>
       <View style={styles.container}>
-        {filteredMovies.slice(-2).map((movie, index) => (
+        {(filteredMovies || []).slice(-2).map((movie, index) => (
           <Movie
             key={movie.id}
             movie={movie}

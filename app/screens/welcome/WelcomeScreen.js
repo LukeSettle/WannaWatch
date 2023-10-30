@@ -20,7 +20,6 @@ const WelcomeScreen = ({ navigation }) => {
   const image = require("../../assets/theater.jpg");
 
   const submitForm = (values) => {
-    console.log("submitting form", values);
     const userParams = {
       device_id: user.device_id,
       display_name: values.display_name,

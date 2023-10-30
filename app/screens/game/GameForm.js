@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Button, TextInput, View, StyleSheet, Keyboard, Select } from "react-native";
 import { Formik } from "formik";
-import { createGame } from "../../data/cosmo_client";
+import { upsertGame } from "../../data/cosmo_client";
 import Error from "../../components/shared/Error";
 import ProvidersSelection from "./ProvidersSelection";
 
@@ -12,7 +12,7 @@ const GameScreen = ({ setGame, user }) => {
   const options = (values) => {
     return({
       method: "GET",
-      url: "https://api.themoviedb.org/3/discover/movie?api_key=27c571472904897e90b202471ab2eacc",
+      url: "https://api.themoviedb.org/3/discover/movie?api_key=fd1efe23da588e99056fdb264ca89bbd",
       params: {
         body: {
           fields: [
@@ -47,8 +47,7 @@ const GameScreen = ({ setGame, user }) => {
       user_id: user.id,
     }
 
-    console.log("GameParams", gameParams)
-    createGame(gameParams)
+    upsertGame(gameParams)
       .then((game) => {
         setGame(game);
       })

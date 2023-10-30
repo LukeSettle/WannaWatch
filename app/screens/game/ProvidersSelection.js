@@ -15,13 +15,11 @@ const ProvidersSelection = ({ values, setValues }) => {
   ]
 
   const toggleValue = (code) => {
-    console.log("values", values);
     if (values.providers.includes(code)) {
       setValues({...values, providers: [values.providers.filter()]})
     } else {
       setValues({...values, providers: [...values.providers, code] });
     }
-    console.log("newValues", values);
   };
 
   return (

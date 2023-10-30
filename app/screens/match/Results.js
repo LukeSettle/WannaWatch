@@ -1,7 +1,15 @@
 import React from "react";
 import { View, Text, Button } from "react-native";
 
-const Results = ({ matchedMovies }) => {
+const Results = ({ game, movies }) => {
+  const matchedMovies = () => {
+    console.log('game', game);
+    const allMovieIds = game.players.map((player) => player.liked_movie_ids);
+    console.log('allMovieIds', allMovieIds);
+    const matchedMovieIds = allMovieIds.reduce((a, b) => a.filter(c => b.includes(c)));
+    return movies.filter((movie) => matchedMovieIds.includes(movie.id));
+  }
+
   return (
     <View>
       {/* <Button
@@ -14,7 +22,7 @@ const Results = ({ matchedMovies }) => {
       /> */}
 
       <Text>Here are the movies everyone matched on:</Text>
-      {matchedMovies.map((movie) => (
+      {matchedMovies().map((movie) => (
         <Text key={movie.id}>{movie.title}</Text>
       ))}
     </View>

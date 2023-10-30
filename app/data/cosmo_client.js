@@ -17,7 +17,6 @@ const options = {
 const client = new CosmosClient(options)
 
 function upsertUser(user) {
-  console.log('Upserting user:\n', user);
   const database = client.database(databaseId);
   const container = database.container(config.usersContainer.id);
 
@@ -33,7 +32,6 @@ function upsertUser(user) {
         return container.items
           .upsert(updatedUser)
           .then(({ resource: updatedDocument }) => {
-            console.log('User updated:', updatedDocument);
             return updatedDocument;
           });
       } else {
@@ -41,7 +39,6 @@ function upsertUser(user) {
         return container.items
           .create(user)
           .then(({ resource: insertedUser }) => {
-            console.log('User inserted:', insertedUser);
             return insertedUser;
           });
       }
@@ -52,25 +49,34 @@ function upsertUser(user) {
     });
 }
 
-async function createGame(game) {
+
+function upsertGame(game) {
   const database = client.database(databaseId);
   const container = database.container(config.gamesContainer.id);
 
-  console.log('Creating game:\n', game);
-
-  // Create the game record
-  return container.items.create(game)
-    .then(({ resource: createdGame }) => {
-      console.log('Game created:', createdGame);
-      return createdGame;
+  return container.items
+    .query(`SELECT * FROM c WHERE c.entry_code = '${game.entry_code}'`)
+    .fetchAll()
+    .then(({ resources: existingGames}) => {
+      if (existingGames.length > 0) {
+        return existingGames[0];
+      } else {
+        // Insert a new game document
+        return container.items
+          .create(game)
+          .then(({ resource: insertedGame }) => {
+            return insertedGame;
+          });
+      }
     })
     .catch(error => {
-      console.error('Error creating game:', error);
-      throw error; // Propagate the exception to the calling code
+      console.error('Error findOrCreating game:', error);
+      throw error;
     });
 }
 
+
 module.exports = {
   upsertUser,
-  createGame
+  upsertGame
 }

@@ -28,7 +28,6 @@ const LoginScreen = ({ navigation }) => {
       },
     })
       .then((response) => {
-        console.log("response", response);
         writeItemToStorage(response.data);
         navigation.navigate("Game");
       })

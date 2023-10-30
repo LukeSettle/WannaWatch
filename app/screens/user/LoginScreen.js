@@ -28,10 +28,8 @@ const LoginScreen = ({ navigation }) => {
       },
     })
       .then((response) => {
-        console.log("response", response);
-        console.log("auth", response.responseHeaders.Authorization);
-        // writeItemToStorage(response);
-        // navigation.navigate("Game");
+        writeItemToStorage(response);
+        navigation.navigate("Game");
       })
       .catch((error) => {
         console.log("error", error)
