@@ -4,21 +4,39 @@ import { FlatList, TouchableHighlight, View, Text } from "react-native";
 const ProvidersSelection = ({ values, setValues }) => {
   const PROVIDERS = [
     {
-      title: "Netflix", code: "nfx"
+      title: "Netflix", code: "8"
     },
     {
-      title: "HBO Max", code: "hbm"
+      title: "HBO Max", code: "1899"
     },
     {
-      title: "Hulu", code: "hlu"
+      title: "Hulu", code: "15"
+    },
+    {
+      title: "Disney+", code: "337"
+    },
+    {
+      title: "Peacock", code: "386"
+    },
+    {
+      title: "Amazon Prime Video", code: "9"
+    },
+    {
+      title: "Paramount Plus", code: "531"
     }
   ]
 
   const toggleValue = (code) => {
     if (values.providers.includes(code)) {
-      setValues({...values, providers: [values.providers.filter()]})
+      setValues({
+        ...values,
+        providers: values.providers.filter((provider) => provider !== code)
+      })
     } else {
-      setValues({...values, providers: [...values.providers, code] });
+      setValues({
+        ...values,
+        providers: [...values.providers, code]
+      })
     }
   };
 

@@ -13,15 +13,12 @@ const MatchScreen = ({ game }) => {
       ...parsedOptions,
       params: {
         ...parsedOptions.params,
-        body: {
-          ...parsedOptions.params.body,
-          page: query.params.body.page
-        }
       }
     }
   }
 
   const getMovies = async () => {
+    console.log('options', options());
     try {
       const response = await axios.request(options());
       const json = await response.data.results

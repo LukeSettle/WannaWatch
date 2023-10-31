@@ -14,27 +14,9 @@ const GameScreen = ({ setGame, user }) => {
       method: "GET",
       url: "https://api.themoviedb.org/3/discover/movie?api_key=fd1efe23da588e99056fdb264ca89bbd",
       params: {
-        body: {
-          fields: [
-            "cinema_release_date",
-            "full_path",
-            "full_paths",
-            "id",
-            "localized_release_date",
-            "object_type",
-            "poster",
-            "scoring",
-            "title",
-            "tmdb_popularity",
-            "offers",
-          ],
-          providers: values.providers,
-          enable_provider_filter: true,
-          monetization_types: [],
-          page: page,
-          page_size: 8,
-          matching_offers_only: true,
-        },
+        with_watch_providers: values.providers.join('|'),
+        watch_region: 'US',
+        page: page,
       },
     })
   };
