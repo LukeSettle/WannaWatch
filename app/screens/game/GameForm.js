@@ -1,7 +1,8 @@
 import React, { useState } from "react";
-import { Button, TextInput, View, StyleSheet, Keyboard, Select } from "react-native";
+import { Button, View, Keyboard } from "react-native";
 import { Formik } from "formik";
 import { upsertGame } from "../../data/cosmo_client";
+import { v4 as uuidv4 } from 'uuid';
 import Error from "../../components/shared/Error";
 import ProvidersSelection from "./ProvidersSelection";
 
@@ -24,7 +25,7 @@ const GameScreen = ({ setGame, user }) => {
   const handleSubmit = (values) => {
     Keyboard.dismiss();
     const gameParams = {
-      entry_code: values.entryCode,
+      entry_code: uuidv4(),
       query: JSON.stringify(options(values)),
       user_id: user.id,
     }
@@ -44,23 +45,12 @@ const GameScreen = ({ setGame, user }) => {
       <Error error={error} />
       <Formik
         initialValues={{
-          entryCode: "",
           providers: [],
         }}
         onSubmit={(values) => handleSubmit(values)}
       >
         {({ handleChange, handleBlur, submitForm, values, setValues }) => (
           <View>
-            <View style={styles.inputContainer}>
-              <TextInput
-                onChangeText={handleChange("entryCode")}
-                onBlur={handleBlur("entryCode")}
-                placeholder="Enter a code for your friends to join"
-                placeholderTextColor="#aaa"
-                value={values.entryCode}
-                style={styles.textInput}
-              />
-            </View>
             <ProvidersSelection values={values} setValues={setValues} />
             <Button onPress={submitForm} title="Create Game" />
           </View>
@@ -69,25 +59,5 @@ const GameScreen = ({ setGame, user }) => {
     </>
   );
 };
-
-const styles = StyleSheet.create({
-  inputContainer: {
-    borderLeftWidth: 4,
-    borderRightWidth: 4,
-    borderTopWidth: 4,
-    borderBottomWidth: 4,
-    borderColor: "#7acbb8",
-    borderRadius: 5,
-    height: 70,
-    margin: 10,
-  },
-  textInput: {
-    borderColor: "#eee",
-    height: 60,
-    backgroundColor: "#ffffff",
-    paddingLeft: 15,
-    paddingRight: 15,
-  },
-});
 
 export default GameScreen;

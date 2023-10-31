@@ -75,8 +75,29 @@ function upsertGame(game) {
     });
 }
 
+function findGameFromEntryCode(entryCode) {
+  const database = client.database(databaseId);
+  const container = database.container(config.gamesContainer.id);
+
+  return container.items
+    .query(`SELECT * FROM c WHERE c.entry_code = '${entryCode}'`)
+    .fetchAll()
+    .then(({ resources: existingGames}) => {
+      if (existingGames.length > 0) {
+        return existingGames[0];
+      } else {
+        throw new Error('Game not found');
+      }
+    })
+    .catch(error => {
+      console.error('Error finding game:', error);
+      throw error;
+    });
+}
+
 
 module.exports = {
   upsertUser,
-  upsertGame
+  upsertGame,
+  findGameFromEntryCode,
 }

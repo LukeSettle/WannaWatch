@@ -1,4 +1,5 @@
-import React, { useState, useEffect, useContext } from "react";
+import React, { useContext } from "react";
+import QRCode from 'react-native-qrcode-svg';
 import { Button, FlatList, Text, View } from "react-native";
 import { UserContext } from "../../contexts/UserContext";
 import { SocketContext } from "../../contexts/SocketContext";
@@ -14,7 +15,7 @@ const Lobby = ({ game, serverMessages }) => {
   return (
     <View>
       <Text>Lobby</Text>
-      <Text>Game: {game.id}</Text>
+      <QRCode value={`exp://192.168.86.46:19000?entry_code=${game.entry_code}`} />
       <Text>Current Players:</Text>
       <FlatList
         data={game.players}

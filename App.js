@@ -11,13 +11,29 @@ import 'react-native-get-random-values';
 import { v4 as uuidv4 } from 'uuid';
 import { UserContext } from "./app/contexts/UserContext";
 import { upsertUser } from "./app/data/cosmo_client";
+import * as Linking from 'expo-linking';
 
 const Stack = createStackNavigator();
 
 export default function App() {
   const [user, setUser] = useState(null);
+  const [entryCode, setEntryCode] = useState(null);
   const [error, setError] = useState(null);
   const [deviceId, setDeviceId] = useState(null);
+
+  useEffect(() => {
+    const getGameEntryCode = async () => {
+      const url = await Linking.getInitialURL();
+      if (!url) return;
+      const { queryParams } = Linking.parse(url);
+      const { entry_code } = queryParams;
+
+      if (entry_code) { setEntryCode(entry_code) }
+    }
+
+    getGameEntryCode();
+  }, [user])
+
 
   useEffect(() => {
     const findOrCreateeDeviceId = async () => {
@@ -50,7 +66,7 @@ export default function App() {
   }, [deviceId])
 
   return (
-    <UserContext.Provider value={{user, setUser}}>
+    <UserContext.Provider value={{user, setUser, entryCode}}>
       <NavigationContainer>
         <Stack.Navigator initialRouteName={"Welcome"}>
           <Stack.Screen name="Welcome" component={WelcomeScreen} />
