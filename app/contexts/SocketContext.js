@@ -4,7 +4,8 @@ import axios from 'axios';
 const SocketContext = createContext({ webSocket: null });
 
 const SocketProvider = ({ handleMessage, user, game, children }) => {
-  const WS_BASE_URL = 'https://18df-96-28-85-126.ngrok-free.app';
+  // const WS_BASE_URL = 'https://wannawatch.azurewebsites.net';
+  const WS_BASE_URL = 'https://wannawatch.azurewebsites.net';
   const [webSocketUrl, setWebSocketUrl] = useState(null);
   const [webSocket, setWebSocket] = useState();
 

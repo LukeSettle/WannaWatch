@@ -1,5 +1,5 @@
 import React from "react";
-import { FlatList, TouchableHighlight, View, Text } from "react-native";
+import { FlatList, TouchableOpacity, View, Text, StyleSheet } from "react-native";
 
 const ProvidersSelection = ({ values, setValues }) => {
   const PROVIDERS = [
@@ -41,20 +41,46 @@ const ProvidersSelection = ({ values, setValues }) => {
   };
 
   return (
-    <View>
+    <View style={styles.container}>
       <FlatList
         data={PROVIDERS}
-        renderItem={({item}) => (
-          <TouchableHighlight
-            onPress={() => toggleValue(item.code)}>
-            <View style={{backgroundColor: values.providers.includes(item.code) ? 'green' : 'white'}}>
-              <Text>{item.title}</Text>
-            </View>
-          </TouchableHighlight>
+        keyExtractor={(item) => item.code}
+        renderItem={({ item }) => (
+          <TouchableOpacity
+            style={[
+              styles.item,
+              values.providers.includes(item.code) && styles.selectedItem,
+            ]}
+            onPress={() => toggleValue(item.code)}
+          >
+            <Text style={styles.itemText}>{item.title}</Text>
+          </TouchableOpacity>
         )}
       />
     </View>
   );
 };
+
+const styles = StyleSheet.create({
+  container: {
+    backgroundColor: '#f0f0f0',
+    borderRadius: 10,
+    overflow: 'hidden',
+  },
+  item: {
+    backgroundColor: '#ffffff',
+    borderBottomWidth: 1,
+    borderBottomColor: '#e0e0e0',
+    paddingVertical: 15,
+    paddingHorizontal: 20,
+  },
+  selectedItem: {
+    backgroundColor: '#28a745',
+  },
+  itemText: {
+    fontSize: 18,
+    color: '#333333',
+  },
+});
 
 export default ProvidersSelection;

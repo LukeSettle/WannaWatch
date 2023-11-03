@@ -20,8 +20,12 @@ const GameScreen = () => {
 
   useEffect(() => {
     if (entryCode) {
-      const gameFromDb = findGameFromEntryCode(entryCode);
-      setGame(gameFromDb);
+      const fetchGame = async () => {
+        const gameFromDb = await findGameFromEntryCode(entryCode);
+        setGame(gameFromDb);
+      }
+
+      fetchGame();
     }
   }, [entryCode])
 

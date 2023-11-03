@@ -1,9 +1,8 @@
 import React, { useContext } from "react";
-
-import { StatusBar } from "expo-status-bar";
+import { Platform } from "react-native";
 import { Formik } from "formik";
 import {
-  Button,
+  Image,
   StyleSheet,
   Text,
   View,
@@ -12,6 +11,7 @@ import {
   ImageBackground,
 } from "react-native";
 import { upsertUser } from "../../data/cosmo_client";
+import logo from "../../assets/logo.png";
 import colors from "../../../config/colors";
 import { UserContext } from "../../contexts/UserContext";
 
@@ -36,9 +36,13 @@ const WelcomeScreen = ({ navigation }) => {
       });
   };
 
-  const visibleButtons = () => {
-    if (user) {
-      return (
+  if (!user) return null;
+
+  return (
+    <ImageBackground source={require("../../assets/theater.jpg")} style={styles.backgroundImage}>
+      <View style={styles.overlay}>
+        <Image source={logo} style={styles.logo} />
+        <Text style={styles.headerText}>So... what do you wanna watch?</Text>
         <Formik
           initialValues={{
             display_name: user.display_name || "",
@@ -46,36 +50,22 @@ const WelcomeScreen = ({ navigation }) => {
           onSubmit={(values) => submitForm(values)}
         >
           {({ handleChange, handleBlur, submitForm, values }) => (
-            <View>
-              <View style={styles.inputContainer}>
-                <TextInput
-                  onChangeText={handleChange("display_name")}
-                  onBlur={handleBlur("display_name")}
-                  placeholder="Enter a name for your friends to see"
-                  placeholderTextColor="#aaa"
-                  value={values.display_name}
-                  style={styles.textInput}
-                />
-              </View>
-              <Pressable
-                style={styles.buttonBase}
-                disabled={!values.display_name}
-                onPress={submitForm}
-              >
-                <Text style={styles.text}>Press to start matching</Text>
+            <View style={styles.formContainer}>
+              <TextInput
+                style={styles.input}
+                onChangeText={handleChange('display_name')}
+                onBlur={handleBlur('display_name')}
+                value={values.display_name}
+                placeholder="Enter your name"
+                placeholderTextColor="#aaa"
+              />
+              <Pressable style={styles.button} onPress={submitForm}>
+                <Text style={styles.buttonText}>Start Matching</Text>
               </Pressable>
             </View>
           )}
         </Formik>
-      );
-    }
-  };
-
-  return (
-    <ImageBackground source={image} style={styles.backgroundImage}>
-      <Text style={styles.headerText}>So... what do you wanna watch?</Text>
-      {visibleButtons()}
-      <StatusBar style="auto" />
+      </View>
     </ImageBackground>
   );
 };
@@ -83,39 +73,52 @@ const WelcomeScreen = ({ navigation }) => {
 export default WelcomeScreen;
 
 const styles = StyleSheet.create({
-  headerText: {
-    textAlign: "center",
-    backgroundColor: colors.secondary,
-    marginHorizontal: 30,
-    marginBottom: 200,
-    padding: 20,
-    color: colors.red,
+  logo: {
+    width: 150,
+    height: 150,
+    alignSelf: 'center',
+    marginBottom: 20,
     borderRadius: 40,
-    overflow: "hidden",
-    fontSize: 40,
-    fontFamily: "Noteworthy-Bold",
-  },
-  buttonBase: {
-    zIndex: 1,
-    marginHorizontal: 30,
-    marginVertical: 10,
-    alignItems: "center",
-    padding: 20,
-    borderRadius: 10,
-    backgroundColor: colors.red,
   },
   backgroundImage: {
     flex: 1,
-    flexDirection: "column",
-    justifyContent: "center",
-    resizeMode: "cover",
-    width: "100%",
+    justifyContent: 'center',
   },
-  textInput: {
-    borderColor: "#eee",
-    height: 60,
-    backgroundColor: "#ffffff",
-    paddingLeft: 15,
-    paddingRight: 15,
+  overlay: {
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    flex: 1,
+    justifyContent: 'center',
+    padding: 20,
+  },
+  headerText: {
+    fontSize: 40,
+    color: '#e74c3c',
+    textAlign: 'center',
+    marginBottom: 20,
+    fontFamily: Platform.OS === "ios" ? "Baskerville-SemiBoldItalic" : "serif",
+  },
+  formContainer: {
+    backgroundColor: '#f0f0f0',
+    borderRadius: 10,
+    padding: 20,
+    marginBottom: 20,
+  },
+  input: {
+    borderColor: '#ddd',
+    borderWidth: 1,
+    borderRadius: 5,
+    padding: 10,
+    marginBottom: 20,
+    fontSize: 18,
+  },
+  button: {
+    backgroundColor: '#e74c3c',
+    borderRadius: 5,
+    padding: 15,
+  },
+  buttonText: {
+    color: '#ffffff',
+    textAlign: 'center',
+    fontSize: 18,
   },
 });
