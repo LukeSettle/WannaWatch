@@ -12,7 +12,7 @@ import {
 } from "react-native";
 import { upsertUser } from "../../data/cosmo_client";
 import logo from "../../assets/logo.png";
-import colors from "../../../config/colors";
+import globalStyles from "../../../config/styles";
 import { UserContext } from "../../contexts/UserContext";
 
 const WelcomeScreen = ({ navigation }) => {
@@ -59,8 +59,14 @@ const WelcomeScreen = ({ navigation }) => {
                 placeholder="Enter your name"
                 placeholderTextColor="#aaa"
               />
-              <Pressable style={styles.button} onPress={submitForm}>
-                <Text style={styles.buttonText}>Start Matching</Text>
+              <Pressable
+                style={({ pressed }) => [
+                  globalStyles.buttonContainer,
+                  pressed && globalStyles.pressedButtonContainer
+                ]}
+                onPress={submitForm}
+              >
+                <Text style={globalStyles.buttonText}>Start Matching</Text>
               </Pressable>
             </View>
           )}
@@ -110,15 +116,5 @@ const styles = StyleSheet.create({
     padding: 10,
     marginBottom: 20,
     fontSize: 18,
-  },
-  button: {
-    backgroundColor: '#e74c3c',
-    borderRadius: 5,
-    padding: 15,
-  },
-  buttonText: {
-    color: '#ffffff',
-    textAlign: 'center',
-    fontSize: 18,
-  },
+  }
 });

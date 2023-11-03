@@ -6,10 +6,10 @@ import { v4 as uuidv4 } from 'uuid';
 import Error from "../../components/shared/Error";
 import Loader from "../../components/shared/Loader";
 import ProvidersSelection from "./ProvidersSelection";
+import globalStyles from "../../../config/styles";
 
 const GameScreen = ({ setGame, user }) => {
   const [error, setError] = useState(null);
-  const [loading, setLoading] = useState(false);
   const [page, setPage] = useState(Math.round(Math.random() * (66 - 1) + 1));
 
   const options = (values) => {
@@ -25,7 +25,6 @@ const GameScreen = ({ setGame, user }) => {
   };
 
   const handleSubmit = (values) => {
-    setLoading(true);
     Keyboard.dismiss();
     const gameParams = {
       entry_code: uuidv4(),
@@ -41,9 +40,6 @@ const GameScreen = ({ setGame, user }) => {
         console.log(error);
         setError("Please enter a valid code")
       })
-      .finally(() => {
-        setLoading(false);
-      });
   };
 
   return (
@@ -60,13 +56,15 @@ const GameScreen = ({ setGame, user }) => {
           <View style={styles.formContainer}>
             <ProvidersSelection values={values} setValues={setValues} />
             <View style={styles.buttonContainer}>
-              {loading ? (
-                <Loader color="#fff" />
-              ) : (
-                <Pressable style={styles.buttonContainer} onPress={submitForm}>
-                  <Text style={styles.buttonText}>Create Game</Text>
-                </Pressable>
-              )}
+              <Pressable
+                style={({ pressed }) => [
+                  globalStyles.buttonContainer,
+                  pressed && globalStyles.pressedButtonContainer
+                ]}
+                onPress={submitForm}
+              >
+                <Text style={globalStyles.buttonText}>Create Game</Text>
+              </Pressable>
             </View>
           </View>
         )}
@@ -99,18 +97,7 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 3.5,
-  },
-  buttonContainer: {
-    backgroundColor: '#e74c3c',
-    borderRadius: 5,
-    paddingVertical: 12,
-  },
-  buttonText: {
-    textAlign: 'center',
-    color: '#ffffff',
-    fontWeight: 'bold',
-    fontSize: 18,
-  },
+  }
 });
 
 export default GameScreen;

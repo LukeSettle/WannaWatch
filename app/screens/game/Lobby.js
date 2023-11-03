@@ -1,16 +1,29 @@
-import React, { useContext } from "react";
+import React, { useContext, useState, useEffect } from "react";
 import QRCode from 'react-native-qrcode-svg';
-import { Button, FlatList, Text, View, StyleSheet } from "react-native";
+import { Pressable, FlatList, Text, View, StyleSheet } from "react-native";
 import { UserContext } from "../../contexts/UserContext";
 import { SocketContext } from "../../contexts/SocketContext";
+import globalStyles from "../../../config/styles";
 
 const Lobby = ({ game, serverMessages }) => {
   const { user } = useContext(UserContext);
   const { webSocket } = useContext(SocketContext);
+  const [gameReady, setGameReady] = useState(false);
 
   const sendReadyMessage = () => {
     webSocket.send(JSON.stringify({ type: 'user', message: 'ready' }));
   }
+
+  useEffect(() => {
+    if (!game || !game.players ) return;
+
+    const player = game.players.find(player => player.id.split('--')[0] === user.id);
+
+    console.log(player);
+    if (player) {
+      setGameReady(true);
+    }
+  }, [game]);
 
   return (
     <View style={styles.container}>
@@ -22,6 +35,17 @@ const Lobby = ({ game, serverMessages }) => {
           size={150}
         />
       </View>
+      <Pressable
+        style={({ pressed }) => [
+          globalStyles.buttonContainer,
+          !gameReady ? globalStyles.disabledButtonContainer : styles.enabledButtonContainer,
+          pressed && globalStyles.pressedButtonContainer
+        ]}
+        onPress={sendReadyMessage}
+        disabled={!gameReady}
+      >
+        <Text style={globalStyles.buttonText}>Ready</Text>
+      </Pressable>
       <Text style={styles.subHeader}>Current Players:</Text>
       <FlatList
         data={game.players}
@@ -38,7 +62,6 @@ const Lobby = ({ game, serverMessages }) => {
         renderItem={({ item }) => <Text style={styles.listText}>{item}</Text>}
         keyExtractor={item => item}
       />
-      <Button title="Ready" onPress={sendReadyMessage} color="#28a745" />
     </View>
   );
 };
@@ -90,6 +113,12 @@ const styles = StyleSheet.create({
     fontSize: 16,
     marginBottom: 10,
     color: '#333333',
+  },
+  button: {
+    marginTop: 20,
+    marginBottom: 20,
+    backgroundColor: '#28a745',
+    padding: 10
   },
 });
 

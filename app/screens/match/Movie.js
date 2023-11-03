@@ -1,12 +1,11 @@
 /* @flow weak */
 
 import React from "react";
-import { StyleSheet, Image, Dimensions } from "react-native";
+import { StyleSheet, Image, Dimensions, View, ScrollView, Text } from "react-native";
 import TinderCard from "./TinderCard";
-import colors from "../../../config/colors";
 const { width, height } = Dimensions.get("window");
 
-const Movie = ({ movie, setUpdateMovieParams }) => {
+const Movie = ({ movie, setUpdateMovieParams, showOverview }) => {
   const onSwipe = (direction) => {
     if (direction == 'left') {
       setUpdateMovieParams({ id: movie.id, liked: false });
@@ -22,31 +21,61 @@ const Movie = ({ movie, setUpdateMovieParams }) => {
   };
 
   return (
-    <TinderCard
-      onSwipe={onSwipe}
-      swipeRequirementType={'position'}
-      preventSwipe={['up', 'down']}
-      swipeThreshold={width - 200}
-    >
-      <Image
-        source={imageSource()}
-        style={styles.poster}
-        resizeMode="cover"
-      />
-    </TinderCard>
+    <View style={styles.container}>
+      <TinderCard
+        onSwipe={onSwipe}
+        swipeRequirementType={'position'}
+        preventSwipe={['up', 'down']}
+        swipeThreshold={width - 200}
+      >
+        <View style={styles.cardContainer}>
+          <Image
+            source={imageSource()}
+            resizeMode="cover"
+            style={styles.poster}
+          />
+          {showOverview && (
+            <View style={styles.textContainer}>
+              <ScrollView>
+                <Text style={styles.description}>{movie.overview}</Text>
+              </ScrollView>
+            </View>
+          )}
+        </View>
+      </TinderCard>
+    </View>
   );
 };
 
 export default Movie;
 
 const styles = StyleSheet.create({
-  poster: {
-    position: "absolute",
-    alignSelf: "center",
+  container: {
+    position: 'absolute',
+    alignSelf: 'center',
     width: width * 0.9,
-    height: height * 0.6,
-    borderRadius: 30,
-    backgroundColor: colors.primary,
-    overflow: "hidden",
+    height: height * 0.7, // Adjust the height based on your preference
+  },
+  cardContainer: {
+    width: '100%',
+    height: '100%',
+    borderRadius: 20,
+    overflow: 'hidden',
+  },
+  poster: {
+    position: 'absolute',
+    width: '100%',
+    height: '100%',
+  },
+  textContainer: {
+    position: 'absolute',
+    bottom: 0,
+    width: '100%',
+    backgroundColor: 'rgba(0, 0, 0, 0.7)', // Semi-transparent background
+    padding: 10,
+  },
+  description: {
+    color: '#FFFFFF', // White text
+    fontSize: 14,
   },
 });
