@@ -7,7 +7,7 @@ const { height, width } = Dimensions.get('window')
 const settings = {
   maxTilt: 25, // in deg
   rotationPower: 50,
-  swipeThreshold: 1.5 // need to update this threshold for RN (1.5 seems reasonable...?)
+  swipeThreshold: 0.5 // need to update this threshold for RN (1.5 seems reasonable...?)
 }
 
 // physical properties of the spring

@@ -26,7 +26,7 @@ const Movie = ({ movie, setUpdateMovieParams, showOverview }) => {
         onSwipe={onSwipe}
         swipeRequirementType={'position'}
         preventSwipe={['up', 'down']}
-        swipeThreshold={width - 200}
+        swipeThreshold={width - 270}
       >
         <View style={styles.cardContainer}>
           <Image
