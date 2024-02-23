@@ -2,7 +2,7 @@ import { StatusBar } from "expo-status-bar";
 import React, { useEffect, useState } from "react";
 import "react-native-url-polyfill/auto"
 import { StyleSheet } from "react-native";
-import WelcomeScreen from "./app/screens/welcome/WelcomeScreen";
+import HomeScreen from "./app/screens/home/HomeScreen";
 import GameScreen from "./app/screens/game/GameScreen";
 import { NavigationContainer } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
@@ -68,8 +68,8 @@ export default function App() {
   return (
     <UserContext.Provider value={{user, setUser, entryCode}}>
       <NavigationContainer>
-        <Stack.Navigator initialRouteName={"Welcome"}>
-          <Stack.Screen name="Welcome" component={WelcomeScreen} />
+        <Stack.Navigator initialRouteName={"Home"}>
+          <Stack.Screen name="Home" component={HomeScreen} />
           <Stack.Screen name="Game" component={GameScreen} />
         </Stack.Navigator>
         <StatusBar style="auto" />

@@ -19,6 +19,7 @@ const GameScreen = ({ setGame, user }) => {
       params: {
         with_watch_providers: values.providers.join('|'),
         watch_region: 'US',
+        with_origin_country: 'US',
         page: page,
       },
     })

@@ -1,5 +1,5 @@
 import React from 'react'
-import { Text, View, PanResponder, Dimensions, StyleSheet, Platform } from 'react-native'
+import { Text, View, Pressable, PanResponder, Dimensions, StyleSheet, Platform } from 'react-native'
 import { useSpring, animated } from '@react-spring/native'
 import colors from "../../../config/colors";
 const { height, width } = Dimensions.get('window')
@@ -155,7 +155,15 @@ const TinderCard = React.forwardRef(
       () =>
         PanResponder.create({
           // Ask to be the responder:
-          onStartShouldSetPanResponder: (evt, gestureState) => true,
+          onStartShouldSetPanResponder: (evt, gestureState) => {
+            // Determine condition to allow press events
+            // For example, check gestureState.dx and gestureState.dy
+            console.log("should start?", (Math.abs(gestureState.dx) < 10 && Math.abs(gestureState.dy) < 10))
+            if (Math.abs(gestureState.dx) < 10 && Math.abs(gestureState.dy) < 10) {
+              return false; // Do not become responder, allowing the Pressable to capture the press event.
+            }
+            return true;
+          },
           onStartShouldSetPanResponderCapture: (evt, gestureState) => true,
           onMoveShouldSetPanResponder: (evt, gestureState) => true,
           onMoveShouldSetPanResponderCapture: (evt, gestureState) => true,
@@ -202,39 +210,41 @@ const TinderCard = React.forwardRef(
     )
 
     return (
-      <AnimatedView
-        {...panResponder.panHandlers}
-        style={{
-          transform: [
-            { translateX: x },
-            { translateY: y },
-            { rotate: rot.to((rot) => `${rot}deg`) }
-          ]
-        }}
-        className={className}
-      >
-        {children}
-        <View style={styles.buttonsWrapper}>
-          <AnimatedView
-            style={[
-              styles.buttonContainer,
-              styles.likeButton,
-              { opacity: x.to((x) => (x < 0 ? 0 : x / swipeThreshold)) },
-            ]}
-          >
-            <Text style={styles.likeText}>Like</Text>
-          </AnimatedView>
-          <AnimatedView
-            style={[
-              styles.buttonContainer,
-              styles.nopeButton,
-              { opacity: x.to((x) => (x > 0 ? 0 : -x / swipeThreshold)) },
-            ]}
-          >
-            <Text style={styles.nopeText}>Nope</Text>
-          </AnimatedView>
-        </View>
-      </AnimatedView>
+      <Pressable onPress={() => console.log("Card Clicked")}>
+        <AnimatedView
+          {...panResponder.panHandlers}
+          style={{
+            transform: [
+              { translateX: x },
+              { translateY: y },
+              { rotate: rot.to((rot) => `${rot}deg`) }
+            ]
+          }}
+          className={className}
+        >
+          {children}
+          <View style={styles.buttonsWrapper}>
+            <AnimatedView
+              style={[
+                styles.buttonContainer,
+                styles.likeButton,
+                { opacity: x.to((x) => (x < 0 ? 0 : x / swipeThreshold)) },
+              ]}
+            >
+              <Text style={styles.likeText}>Like</Text>
+            </AnimatedView>
+            <AnimatedView
+              style={[
+                styles.buttonContainer,
+                styles.nopeButton,
+                { opacity: x.to((x) => (x > 0 ? 0 : -x / swipeThreshold)) },
+              ]}
+            >
+              <Text style={styles.nopeText}>Nope</Text>
+            </AnimatedView>
+          </View>
+        </AnimatedView>
+      </Pressable>
     )
   }
 )
@@ -274,4 +284,4 @@ const styles = StyleSheet.create({
   },
 })
 
-module.exports = TinderCard
+export default TinderCard

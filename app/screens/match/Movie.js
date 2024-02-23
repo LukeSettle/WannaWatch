@@ -1,11 +1,11 @@
 /* @flow weak */
 
 import React from "react";
-import { StyleSheet, Image, Dimensions, View, ScrollView, Text } from "react-native";
+import { StyleSheet, Image, Dimensions, View, ScrollView, Text, Pressable } from "react-native";
 import TinderCard from "./TinderCard";
 const { width, height } = Dimensions.get("window");
 
-const Movie = ({ movie, setUpdateMovieParams, showOverview }) => {
+const Movie = ({ movie, setUpdateMovieParams, setShowOverview, showOverview }) => {
   const onSwipe = (direction) => {
     if (direction == 'left') {
       setUpdateMovieParams({ id: movie.id, liked: false });

@@ -9,8 +9,10 @@ const Lobby = ({ game, serverMessages }) => {
   const { user } = useContext(UserContext);
   const { webSocket } = useContext(SocketContext);
   const [gameReady, setGameReady] = useState(false);
+  const [userReady, setUserReady] = useState(false);
 
   const sendReadyMessage = () => {
+    setUserReady(true);
     webSocket.send(JSON.stringify({ type: 'user', message: 'ready' }));
   }
 
@@ -19,7 +21,6 @@ const Lobby = ({ game, serverMessages }) => {
 
     const player = game.players.find(player => player.id.split('--')[0] === user.id);
 
-    console.log(player);
     if (player) {
       setGameReady(true);
     }
@@ -42,7 +43,7 @@ const Lobby = ({ game, serverMessages }) => {
           pressed && globalStyles.pressedButtonContainer
         ]}
         onPress={sendReadyMessage}
-        disabled={!gameReady}
+        disabled={!gameReady || userReady}
       >
         <Text style={globalStyles.buttonText}>Ready</Text>
       </Pressable>

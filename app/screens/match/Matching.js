@@ -68,6 +68,7 @@ const Matching = ({ game, movies, setMovies }) => {
             movie={movie}
             setUpdateMovieParams={setUpdateMovieParams}
             showOverview={showOverview}
+            setShowOverview={setShowOverview}
           />
         ))}
       </View>
