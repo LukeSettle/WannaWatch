@@ -11,7 +11,7 @@ if (
   UIManager.setLayoutAnimationEnabledExperimental(true);
 }
 
-function MovieDetails({ movie }) {
+function MovieDetails({ movie, autoFetch = false }) {
   const [showFullDetails, setShowFullDetails] = useState(false);
   const [movieDetails, setMovieDetails] = useState(null);
 
@@ -78,6 +78,10 @@ function MovieDetails({ movie }) {
   }
 
   useEffect(() => {
+    if (autoFetch) {
+      fetchDetails();
+    }
+
     // Set the initial state for the LayoutAnimation
     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
   }, []);

@@ -15,7 +15,6 @@ const Matching = ({ game, movies, setMovies }) => {
   const [updateMovieParams, setUpdateMovieParams] = useState(null);
   const [filteredMovies, setFilteredMovies] = useState(null);
   const [likedMovies, setLikedMovies] = useState([]);
-  const [showOverview, setShowOverview] = useState(false);
   const { webSocket } = useContext(SocketContext);
 
   const nopeCurrentMovie = () => {
@@ -62,27 +61,16 @@ const Matching = ({ game, movies, setMovies }) => {
   return (
     <View style={styles.outer_container}>
       <View style={styles.container}>
-        {(filteredMovies || []).slice(-2).map((movie, index) => (
+        {(filteredMovies || []).map((movie, index) => (
           <Movie
             key={movie.id}
             movie={movie}
             setUpdateMovieParams={setUpdateMovieParams}
-            showOverview={showOverview}
-            setShowOverview={setShowOverview}
           />
         ))}
       </View>
       <View style={styles.directions}>
         <Ionicons onPress={nopeCurrentMovie} name="arrow-back" size={32} color="red" />
-        <Pressable
-          style={({ pressed }) => [
-            globalStyles.buttonContainer,
-            pressed && globalStyles.pressedButtonContainer
-          ]}
-          onPress={() => setShowOverview(!showOverview)}
-        >
-          <Text style={globalStyles.buttonText}>{showOverview ? "Hide Overview" : "Show Overview"}</Text>
-        </Pressable>
         <Ionicons onPress={likeCurrentMovie} name="arrow-forward" size={32} color="green" />
       </View>
     </View>

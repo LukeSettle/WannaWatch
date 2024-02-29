@@ -1,287 +1,171 @@
-import React from 'react'
-import { Text, View, Pressable, PanResponder, Dimensions, StyleSheet, Platform } from 'react-native'
-import { useSpring, animated } from '@react-spring/native'
-import colors from "../../../config/colors";
-const { height, width } = Dimensions.get('window')
+import React, { useState } from 'react';
+import { View, StyleSheet, Dimensions, Text } from 'react-native';
+import { PanGestureHandler } from 'react-native-gesture-handler';
+import Animated, {
+  useAnimatedGestureHandler,
+  useAnimatedStyle,
+  useSharedValue,
+  withSpring,
+  runOnJS,
+} from 'react-native-reanimated';
 
-const settings = {
-  maxTilt: 25, // in deg
-  rotationPower: 50,
-  swipeThreshold: 0.5 // need to update this threshold for RN (1.5 seems reasonable...?)
-}
+const { width: SCREEN_WIDTH } = Dimensions.get('window');
+const SWIPE_THRESHOLD = SCREEN_WIDTH * 0.3;
+const ROTATION_ANGLE = 10; // Adjust this for more or less rotation
 
-// physical properties of the spring
-const physics = {
-  touchResponsive: {
-    friction: 50,
-    tension: 2000
-  },
-  animateOut: {
-    friction: 30,
-    tension: 400
-  },
-  animateBack: {
-    friction: 10,
-    tension: 200
-  }
-}
+const TinderCard = ({ children, onSwipe }) => {
+  const translateX = useSharedValue(0);
+  const [flipped, setFlipped] = useState(false);
+  const likeOpacity = useSharedValue(0);
+  const nopeOpacity = useSharedValue(0);
 
-const pythagoras = (x, y) => {
-  return Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2))
-}
+  const handleSwipeComplete = (swipeDirection) => {
+    onSwipe(swipeDirection);
+    likeOpacity.value = 0; // Reset likeOpacity
+    nopeOpacity.value = 0; // Reset nopeOpacity
+  };
 
-const normalize = (vector) => {
-  const length = Math.sqrt(Math.pow(vector.x, 2) + Math.pow(vector.y, 2))
-  return { x: vector.x / length, y: vector.y / length }
-}
-
-const animateOut = async (gesture, setSpringTarget) => {
-  const diagonal = pythagoras(height, width)
-  const velocity = pythagoras(gesture.x, gesture.y)
-  const finalX = diagonal * gesture.x
-  const finalY = diagonal * gesture.y
-  const finalRotation = gesture.x * 45
-  const duration = diagonal / velocity
-
-  setSpringTarget.current[0].start({
-    x: finalX,
-    y: finalY,
-    rot: finalRotation, // set final rotation value based on gesture.vx
-    config: { duration: duration }
-  })
-
-  // for now animate back
-  return await new Promise((resolve) =>
-    setTimeout(() => {
-      resolve()
-    }, duration)
-  )
-}
-
-const animateBack = (setSpringTarget) => {
-  // translate back to the initial position
-  return new Promise((resolve) => {
-    setSpringTarget.current[0].start({ x: 0, y: 0, rot: 0, config: physics.animateBack, onRest: resolve })
-  })
-}
-
-const getSwipeDirection = (property) => {
-  if (Math.abs(property.x) > Math.abs(property.y)) {
-    if (property.x > settings.swipeThreshold) {
-      return 'right'
-    } else if (property.x < -settings.swipeThreshold) {
-      return 'left'
-    }
-  } else {
-    if (property.y > settings.swipeThreshold) {
-      return 'down'
-    } else if (property.y < -settings.swipeThreshold) {
-      return 'up'
-    }
-  }
-  return 'none'
-}
-
-// must be created outside of the TinderCard forwardRef
-const AnimatedView = animated(View)
-
-const TinderCard = React.forwardRef(
-  (
-    { flickOnSwipe = true, children, onSwipe, onCardLeftScreen, className, preventSwipe = [], swipeRequirementType = 'velocity', swipeThreshold = settings.swipeThreshold, onSwipeRequirementFulfilled, onSwipeRequirementUnfulfilled },
-    ref
-  ) => {
-    const [{ x, y, rot }, setSpringTarget] = useSpring(() => ({
-      x: 0,
-      y: 0,
-      rot: 0,
-      config: physics.touchResponsive
-    }))
-    settings.swipeThreshold = swipeThreshold
-
-    React.useImperativeHandle(ref, () => ({
-      async swipe (dir = 'right') {
-        if (onSwipe) onSwipe(dir)
-        const power = 1.3
-        const disturbance = (Math.random() - 0.5) / 2
-        if (dir === 'right') {
-          await animateOut({ x: power, y: disturbance }, setSpringTarget)
-        } else if (dir === 'left') {
-          await animateOut({ x: -power, y: disturbance }, setSpringTarget)
-        } else if (dir === 'up') {
-          await animateOut({ x: disturbance, y: power }, setSpringTarget)
-        } else if (dir === 'down') {
-          await animateOut({ x: disturbance, y: -power }, setSpringTarget)
-        }
-        if (onCardLeftScreen) onCardLeftScreen(dir)
-      },
-      async restoreCard () {
-        await animateBack(setSpringTarget)
+  const gestureHandler = useAnimatedGestureHandler({
+    onStart: (_, ctx) => {
+      ctx.startX = translateX.value;
+    },
+    onActive: (event, ctx) => {
+      translateX.value = ctx.startX + event.translationX;
+      likeOpacity.value = translateX.value > 0 ? Math.min(1, translateX.value / (SCREEN_WIDTH * 0.5)) : 0;
+      nopeOpacity.value = translateX.value < 0 ? Math.min(1, -translateX.value / (SCREEN_WIDTH * 0.5)) : 0;
+    },
+    onEnd: (_) => {
+      if (Math.abs(translateX.value) > SWIPE_THRESHOLD) {
+        const swipeDirection = translateX.value > 0 ? 'right' : 'left';
+        runOnJS(handleSwipeComplete)(swipeDirection);
+      } else {
+        translateX.value = withSpring(0);
+        likeOpacity.value = withSpring(0);
+        nopeOpacity.value = withSpring(0);
       }
-    }))
+    },
+  });
 
-    const handleSwipeReleased = React.useCallback(
-      async (setSpringTarget, gesture) => {
-        // Check if this is a swipe
-        const dir = getSwipeDirection({
-          x: swipeRequirementType === 'velocity' ? gesture.vx : gesture.dx,
-          y: swipeRequirementType === 'velocity' ? gesture.vy : gesture.dy
-        })
+  const cardStyle = useAnimatedStyle(() => {
+    const rotate = translateX.value / SCREEN_WIDTH * ROTATION_ANGLE;
+    return {
+      transform: [
+        { translateX: translateX.value },
+        { rotate: `${rotate}deg` },
+      ],
+    };
+  });
 
-        if (dir !== 'none') {
-          if (flickOnSwipe) {
-            if (!preventSwipe.includes(dir)) {
-              if (onSwipe) onSwipe(dir)
+  const likeStyle = useAnimatedStyle(() => ({
+    opacity: likeOpacity.value,
+  }));
 
-              await animateOut(swipeRequirementType === 'velocity' ? ({
-                x: gesture.vx,
-                y: gesture.vy
-              }) : (
-                normalize({ x: gesture.dx, y: gesture.dy }) // Normalize to avoid flicking the card away with super fast speed only direction is wanted here
-              ), setSpringTarget, swipeRequirementType)
-              if (onCardLeftScreen) onCardLeftScreen(dir)
-              return
-            }
-          }
-        }
+  const nopeStyle = useAnimatedStyle(() => ({
+    opacity: nopeOpacity.value,
+  }));
 
-        // Card was not flicked away, animate back to start
-        animateBack(setSpringTarget)
-      },
-      [flickOnSwipe, onSwipe, onCardLeftScreen, preventSwipe]
-    )
+  const onPress = () => {
+    setFlipped(!flipped);
+  };
 
-    let swipeThresholdFulfilledDirection = 'none'
-    const panResponder = React.useMemo(
-      () =>
-        PanResponder.create({
-          // Ask to be the responder:
-          onStartShouldSetPanResponder: (evt, gestureState) => {
-            // Determine condition to allow press events
-            // For example, check gestureState.dx and gestureState.dy
-            console.log("should start?", (Math.abs(gestureState.dx) < 10 && Math.abs(gestureState.dy) < 10))
-            if (Math.abs(gestureState.dx) < 10 && Math.abs(gestureState.dy) < 10) {
-              return false; // Do not become responder, allowing the Pressable to capture the press event.
-            }
-            return true;
-          },
-          onStartShouldSetPanResponderCapture: (evt, gestureState) => true,
-          onMoveShouldSetPanResponder: (evt, gestureState) => true,
-          onMoveShouldSetPanResponderCapture: (evt, gestureState) => true,
+  return (
+    <View style={styles.container}>
+      <PanGestureHandler onGestureEvent={gestureHandler}>
+        <Animated.View style={[styles.card, cardStyle]}>
+          {/* Like and Nope indicators */}
+          <Animated.Text style={[styles.like, likeStyle]}>LIKE</Animated.Text>
+          <Animated.Text style={[styles.nope, nopeStyle]}>NOPE</Animated.Text>
 
-          onPanResponderGrant: (evt, gestureState) => {
-            // The gesture has started.
-            // Probably wont need this anymore as postion i relative to swipe!
-            setSpringTarget.current[0].start({ x: gestureState.dx, y: gestureState.dy, rot: 0, config: physics.touchResponsive })
-          },
-          onPanResponderMove: (evt, gestureState) => {
-            // Check fulfillment
-            if (onSwipeRequirementFulfilled || onSwipeRequirementUnfulfilled) {
-              const dir = getSwipeDirection({
-                x: swipeRequirementType === 'velocity' ? gestureState.vx : gestureState.dx,
-                y: swipeRequirementType === 'velocity' ? gestureState.vy : gestureState.dy
-              })
-              if (dir !== swipeThresholdFulfilledDirection) {
-                swipeThresholdFulfilledDirection = dir
-                if (swipeThresholdFulfilledDirection === 'none') {
-                  if (onSwipeRequirementUnfulfilled) onSwipeRequirementUnfulfilled()
-                } else {
-                  if (onSwipeRequirementFulfilled) onSwipeRequirementFulfilled(dir)
-                }
-              }
-            }
-
-            // use guestureState.vx / guestureState.vy for velocity calculations
-            // translate element
-            let rot = ((300 * gestureState.vx) / width) * 15// Magic number 300 different on different devices? Run on physical device!
-            rot = Math.max(Math.min(rot, settings.maxTilt), -settings.maxTilt)
-            setSpringTarget.current[0].start({ x: gestureState.dx, y: gestureState.dy, rot, config: physics.touchResponsive })
-          },
-          onPanResponderTerminationRequest: (evt, gestureState) => {
-            return true
-          },
-          onPanResponderRelease: (evt, gestureState) => {
-            // The user has released all touches while this view is the
-            // responder. This typically means a gesture has succeeded
-            // enable
-            handleSwipeReleased(setSpringTarget, gestureState)
-          }
-        }),
-      []
-    )
-
-    return (
-      <Pressable onPress={() => console.log("Card Clicked")}>
-        <AnimatedView
-          {...panResponder.panHandlers}
-          style={{
-            transform: [
-              { translateX: x },
-              { translateY: y },
-              { rotate: rot.to((rot) => `${rot}deg`) }
-            ]
-          }}
-          className={className}
-        >
-          {children}
-          <View style={styles.buttonsWrapper}>
-            <AnimatedView
-              style={[
-                styles.buttonContainer,
-                styles.likeButton,
-                { opacity: x.to((x) => (x < 0 ? 0 : x / swipeThreshold)) },
-              ]}
-            >
-              <Text style={styles.likeText}>Like</Text>
-            </AnimatedView>
-            <AnimatedView
-              style={[
-                styles.buttonContainer,
-                styles.nopeButton,
-                { opacity: x.to((x) => (x > 0 ? 0 : -x / swipeThreshold)) },
-              ]}
-            >
-              <Text style={styles.nopeText}>Nope</Text>
-            </AnimatedView>
+          {/* Card content */}
+          <View style={styles.content} onTouchEnd={onPress}>
+            {flipped ? (
+              children[1]
+            ) : (
+              children[0]
+            )}
           </View>
-        </AnimatedView>
-      </Pressable>
-    )
-  }
-)
+        </Animated.View>
+      </PanGestureHandler>
+    </View>
+  );
+};
 
 const styles = StyleSheet.create({
-  buttonsWrapper: {
-    position: "absolute",
-    flexDirection: "row",
-    justifyContent: "space-around",
-    width: "100%",
-    marginTop: 10,
+  container: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
-  buttonContainer: {
-    height: undefined,
-    justifyContent: "center",
-    alignItems: "center",
+  card: {
+    width: 300,
+    height: 400,
+    backgroundColor: 'white',
+    justifyContent: 'center',
+    alignItems: 'center',
     borderRadius: 10,
-    padding: 10,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
+    position: 'relative', // Ensure indicators are positioned absolutely within the card
+    zIndex: 1,
   },
-  likeButton: {
-    backgroundColor: colors.quaternary,
-    color: "white",
+  like: {
+    position: 'absolute',
+    top: 20,
+    left: 20,
+    fontSize: 32,
+    color: 'green',
+    fontWeight: 'bold',
+    transform: [{ rotate: '-20deg' }],
+    zIndex: 2,
+    backgroundColor: 'white', // Added white background
+    borderWidth: 2, // Added border width
+    borderColor: 'green', // Matching border color with text
+    padding: 8, // Added padding for better text visibility
+    borderRadius: 5, // Rounded corners for the border
+    overflow: 'hidden', // Ensures the background does not bleed outside the border radius
+    elevation: 4, // Add shadow effect for Android
+    shadowColor: '#000', // Shadow color
+    shadowOffset: { width: 0, height: 2 }, // Shadow direction and distance
+    shadowOpacity: 0.25, // Shadow opacity
+    shadowRadius: 3.84, // Shadow blur radius
   },
-  nopeButton: {
-    backgroundColor: colors.red,
-    color: "white",
+  nope: {
+    position: 'absolute',
+    top: 20,
+    right: 20,
+    fontSize: 32,
+    color: 'red',
+    fontWeight: 'bold',
+    transform: [{ rotate: '20deg' }],
+    zIndex: 2,
+    backgroundColor: 'white', // Added white background
+    borderWidth: 2, // Added border width
+    borderColor: 'red', // Matching border color with text
+    padding: 8, // Added padding for better text visibility
+    borderRadius: 5, // Rounded corners for the border
+    overflow: 'hidden', // Ensures the background does not bleed outside the border radius
+    elevation: 4, // Add shadow effect for Android
+    shadowColor: '#000', // Shadow color
+    shadowOffset: { width: 0, height: 2 }, // Shadow direction and distance
+    shadowOpacity: 0.25, // Shadow opacity
+    shadowRadius: 3.84, // Shadow blur radius
   },
-  likeText: {
-    color: "white",
-    fontSize: 30,
-    fontFamily: Platform.OS === "ios" ? "Baskerville-SemiBoldItalic" : "serif",
+  content: {
+    width: '100%',
+    height: '100%',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
-  nopeText: {
-    color: "white",
-    fontSize: 30,
-    fontFamily: Platform.OS === "ios" ? "Baskerville-SemiBoldItalic" : "serif",
+  text: {
+    fontSize: 24,
+    fontWeight: 'bold',
   },
-})
+});
 
-export default TinderCard
+export default TinderCard;

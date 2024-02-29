@@ -3,9 +3,10 @@
 import React from "react";
 import { StyleSheet, Image, Dimensions, View, ScrollView, Text, Pressable } from "react-native";
 import TinderCard from "./TinderCard";
+import MovieDetails from "./MovieDetails";
 const { width, height } = Dimensions.get("window");
 
-const Movie = ({ movie, setUpdateMovieParams, setShowOverview, showOverview }) => {
+const Movie = ({ movie, setUpdateMovieParams}) => {
   const onSwipe = (direction) => {
     if (direction == 'left') {
       setUpdateMovieParams({ id: movie.id, liked: false });
@@ -34,13 +35,11 @@ const Movie = ({ movie, setUpdateMovieParams, setShowOverview, showOverview }) =
             resizeMode="cover"
             style={styles.poster}
           />
-          {showOverview && (
-            <View style={styles.textContainer}>
-              <ScrollView>
-                <Text style={styles.description}>{movie.overview}</Text>
-              </ScrollView>
-            </View>
-          )}
+        </View>
+        <View style={styles.cardContainer}>
+          <ScrollView>
+            <MovieDetails movie={movie} autoFetch />
+          </ScrollView>
         </View>
       </TinderCard>
     </View>
@@ -59,7 +58,7 @@ const styles = StyleSheet.create({
   cardContainer: {
     width: '100%',
     height: '100%',
-    borderRadius: 20,
+    borderRadius: 10,
     overflow: 'hidden',
   },
   poster: {
