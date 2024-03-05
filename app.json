@@ -5,7 +5,11 @@
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./app/assets/icon.png",
-    "platforms": ["android", "ios", "web"],
+    "platforms": [
+      "android",
+      "ios",
+      "web"
+    ],
     "scheme": "wannawatch",
     "splash": {
       "image": "./app/assets/splash.png",
@@ -15,9 +19,12 @@
     "updates": {
       "fallbackToCacheTimeout": 0
     },
-    "assetBundlePatterns": ["**/*"],
+    "assetBundlePatterns": [
+      "**/*"
+    ],
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.lsettle.WannaWatch"
     },
     "android": {
       "adaptiveIcon": {
@@ -27,7 +34,10 @@
     },
     "extra": {
       "API_URL": "https://629d-74-133-228-129.ngrok-free.app",
-      "WEBSOCKET_URL": "wss://wannawatch.azurewebsites.net/"
+      "WEBSOCKET_URL": "wss://wannawatch.azurewebsites.net/",
+      "eas": {
+        "projectId": "27986aac-b8b0-4416-ba18-02704883e73f"
+      }
     },
     "description": "WannaWatch helps you and your significant other choose what to watch on date night! "
   }
