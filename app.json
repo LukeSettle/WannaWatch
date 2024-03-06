@@ -39,6 +39,9 @@
         "projectId": "27986aac-b8b0-4416-ba18-02704883e73f"
       }
     },
-    "description": "WannaWatch helps you and your significant other choose what to watch on date night! "
+    "description": "WannaWatch helps you and your significant other choose what to watch on date night! ",
+    "plugins": [
+      "expo-secure-store"
+    ]
   }
 }
