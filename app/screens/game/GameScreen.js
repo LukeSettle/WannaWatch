@@ -4,7 +4,7 @@ import Lobby from "./Lobby";
 import { UserContext } from "../../contexts/UserContext";
 import { SocketProvider } from '../../contexts/SocketContext';
 import MatchScreen from "../match/MatchScreen";
-import { findGameFromEntryCode } from "../../data/cosmo_client";
+import { findGameFromEntryCode } from "../../data/backend_client";
 
 const GameScreen = () => {
   const { user, entryCode } = useContext(UserContext);
@@ -12,9 +12,10 @@ const GameScreen = () => {
   const [serverMessages, setServerMessages] = useState([]);
 
   const handleMessage = (data) => {
-    if (data.type === 'system') {
-      setServerMessages(prevMessages => [...prevMessages, data.message]);
-      if (data.game) { setGame(data.game) }
+    console.log('data', data);
+    if (data.message?.type === 'system') {
+      setServerMessages(prevMessages => [...prevMessages, data.message.message]);
+      if (data.message.game) { setGame(JSON.parse(data.message.game)) }
     }
   };
 
@@ -35,7 +36,7 @@ const GameScreen = () => {
 
   return (
     <SocketProvider handleMessage={handleMessage} user={user} game={game} serverMessages={serverMessages}>
-      {game.started
+      {game.started_at
         ? <MatchScreen game={game} />
         : <Lobby game={game} serverMessages={serverMessages} />
       }

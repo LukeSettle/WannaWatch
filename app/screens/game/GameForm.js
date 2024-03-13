@@ -1,10 +1,9 @@
 import React, { useState } from "react";
 import { Pressable, View, StyleSheet, Keyboard, Text } from "react-native";
 import { Formik } from "formik";
-import { upsertGame } from "../../data/cosmo_client";
+import { upsertGame } from "../../data/backend_client";
 import { v4 as uuidv4 } from 'uuid';
 import Error from "../../components/shared/Error";
-import Loader from "../../components/shared/Loader";
 import ProvidersSelection from "./ProvidersSelection";
 import globalStyles from "../../../config/styles";
 

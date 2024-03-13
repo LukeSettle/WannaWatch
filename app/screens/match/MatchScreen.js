@@ -42,7 +42,7 @@ const MatchScreen = ({ game }) => {
 
   return (
     <>
-      {!game.finished
+      {!game.finished_at
         ? movies.length > 0 && <Matching game={game} movies={movies} setMovies={setMovies} />
         : <Results game={game} movies={movies} />
       }

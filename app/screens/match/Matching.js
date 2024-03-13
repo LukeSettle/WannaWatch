@@ -45,13 +45,22 @@ const Matching = ({ game, movies, setMovies }) => {
   useEffect(() => {
     if (filteredMovies == null || filteredMovies.length !== 0) return;
 
-    const message = {
-      type: 'user',
-      message: 'finish_matching',
-      liked_movie_ids: likedMovies.map((movie) => movie.id),
-    };
-
-    webSocket.send(JSON.stringify(message))
+    webSocket.send(
+      JSON.stringify(
+        {
+          command: "message",
+          identifier: JSON.stringify(
+            { channel: "GameChannel", game_id: game.id }
+          ),
+          data: JSON.stringify(
+            {
+              action: 'finish_matching',
+              liked_movie_ids: likedMovies.map((movie) => movie.id)
+            }
+          )
+        }
+      )
+    );
   }, [filteredMovies]);
 
   if (movies.length === 0) {

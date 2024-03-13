@@ -5,31 +5,15 @@ const SocketContext = createContext({ webSocket: null });
 
 const SocketProvider = ({ handleMessage, user, game, children }) => {
   // const WS_BASE_URL = 'https://wannawatch.azurewebsites.net';
-  const WS_BASE_URL = 'https://wannawatch.azurewebsites.net';
-  const [webSocketUrl, setWebSocketUrl] = useState(null);
+  const WS_BASE_URL = `https://wanna-watch-rails.onrender.com/cable?user_id=${user.id}`;
   const [webSocket, setWebSocket] = useState();
 
   useEffect(() => {
-    const fetchWebSocketUrl = async () => {
-      const socketId = `${user.id}--${game.id}--${user.display_name}`;
-      try {
-        const response = await axios.get(`${WS_BASE_URL}/negotiate?id=${socketId}`);
-        setWebSocketUrl(response.data.url);
-      } catch (error) {
-        console.error('Error fetching WebSocket URL:', error);
-      }
-    };
-
-    fetchWebSocketUrl();
-  }, []);
-
-  useEffect(() => {
-    if (webSocketUrl === null) return;
-
-    const ws = new WebSocket(webSocketUrl);
+    const ws = new WebSocket(WS_BASE_URL);
 
     ws.onopen = () => {
       console.log('Connected to the server')
+      ws.send(JSON.stringify({command: "subscribe", identifier: JSON.stringify({ channel: "GameChannel", game_id: game.id }) }));
     };
 
     ws.onclose = (e) => {
@@ -52,7 +36,7 @@ const SocketProvider = ({ handleMessage, user, game, children }) => {
       ws.close();
       console.log('WebSocket connection closed');
     };
-  }, [webSocketUrl]);
+  }, []);
 
   return (
     <SocketContext.Provider value={{ webSocket }}>{children}</SocketContext.Provider>

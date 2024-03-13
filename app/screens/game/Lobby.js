@@ -13,13 +13,23 @@ const Lobby = ({ game, serverMessages }) => {
 
   const sendReadyMessage = () => {
     setUserReady(true);
-    webSocket.send(JSON.stringify({ type: 'user', message: 'ready' }));
+    webSocket.send(
+      JSON.stringify(
+        {
+          command: "message",
+          identifier: JSON.stringify(
+            { channel: "GameChannel", game_id: game.id }
+          ),
+          data: JSON.stringify({ action: 'ready' })
+        }
+      )
+    );
   }
 
   useEffect(() => {
     if (!game || !game.players ) return;
 
-    const player = game.players.find(player => player.id.split('--')[0] === user.id);
+    const player = game.players.find(player => player.user_id === user.id);
 
     if (player) {
       setGameReady(true);
@@ -32,7 +42,7 @@ const Lobby = ({ game, serverMessages }) => {
       <Text style={styles.instructionText}>Scan code to join game</Text>
       <View style={styles.qrCodeContainer}>
         <QRCode
-          value={`exp://192.168.86.46:19000?entry_code=${game.entry_code}`}
+          value={`exp://192.168.86.38:8081?entry_code=${game.entry_code}`}
           size={150}
         />
       </View>
@@ -52,7 +62,7 @@ const Lobby = ({ game, serverMessages }) => {
         data={game.players}
         renderItem={({ item }) => (
           <View style={styles.playerItem}>
-            <Text style={styles.playerText}>{item.display_name}</Text>
+            <Text style={styles.playerText}>{item.username}</Text>
           </View>
         )}
         keyExtractor={item => item.id}

@@ -10,7 +10,7 @@ import {
   TextInput,
   ImageBackground,
 } from "react-native";
-import { upsertUser } from "../../data/cosmo_client";
+import { upsertUser } from "../../data/backend_client";
 import logo from "../../assets/logo.png";
 import globalStyles from "../../../config/styles";
 import { UserContext } from "../../contexts/UserContext";
@@ -22,7 +22,7 @@ const WelcomeScreen = ({ navigation }) => {
   const submitForm = (values) => {
     const userParams = {
       device_id: user.device_id,
-      display_name: values.display_name,
+      username: values.username,
     }
 
     upsertUser(userParams)
@@ -45,7 +45,7 @@ const WelcomeScreen = ({ navigation }) => {
         <Text style={styles.headerText}>So... what do you wanna watch?</Text>
         <Formik
           initialValues={{
-            display_name: user.display_name || "",
+            username: user.username || "",
           }}
           onSubmit={(values) => submitForm(values)}
         >
@@ -53,9 +53,9 @@ const WelcomeScreen = ({ navigation }) => {
             <View style={styles.formContainer}>
               <TextInput
                 style={styles.input}
-                onChangeText={handleChange('display_name')}
-                onBlur={handleBlur('display_name')}
-                value={values.display_name}
+                onChangeText={handleChange('username')}
+                onBlur={handleBlur('username')}
+                value={values.username}
                 placeholder="Enter your name"
                 placeholderTextColor="#aaa"
               />

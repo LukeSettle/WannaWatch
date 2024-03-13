@@ -10,7 +10,7 @@ import * as SecureStore from 'expo-secure-store';
 import 'react-native-get-random-values';
 import { v4 as uuidv4 } from 'uuid';
 import { UserContext } from "./app/contexts/UserContext";
-import { upsertUser } from "./app/data/cosmo_client";
+import { upsertUser } from "./app/data/backend_client";
 import * as Linking from 'expo-linking';
 
 const Stack = createStackNavigator();
@@ -59,10 +59,6 @@ export default function App() {
       .then(upsertedUser => {
         setUser(upsertedUser)
       })
-      .catch(error => {
-        console.error('Error upserting user:', error);
-        setError(error);
-      });
   }, [deviceId])
 
   return (
