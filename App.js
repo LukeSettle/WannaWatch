@@ -24,9 +24,11 @@ export default function App() {
   useEffect(() => {
     const getGameEntryCode = async () => {
       const url = await Linking.getInitialURL();
+      console.log('initialURl', url);
       if (!url) return;
       const { queryParams } = Linking.parse(url);
       const { entry_code } = queryParams;
+      console.log('entry_code', entry_code);
 
       if (entry_code) { setEntryCode(entry_code) }
     }

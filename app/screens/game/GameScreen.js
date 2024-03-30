@@ -12,7 +12,6 @@ const GameScreen = () => {
   const [serverMessages, setServerMessages] = useState([]);
 
   const handleMessage = (data) => {
-    console.log('data', data);
     if (data.message?.type === 'system') {
       setServerMessages(prevMessages => [...prevMessages, data.message.message]);
       if (data.message.game) { setGame(JSON.parse(data.message.game)) }
@@ -21,6 +20,7 @@ const GameScreen = () => {
 
   useEffect(() => {
     if (entryCode) {
+      console.log('trying to find by code', entryCode);
       const fetchGame = async () => {
         const gameFromDb = await findGameFromEntryCode(entryCode);
         setGame(gameFromDb);

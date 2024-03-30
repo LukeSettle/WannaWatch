@@ -42,7 +42,7 @@ const Lobby = ({ game, serverMessages }) => {
       <Text style={styles.instructionText}>Scan code to join game</Text>
       <View style={styles.qrCodeContainer}>
         <QRCode
-          value={`exp://192.168.86.38:8081?entry_code=${game.entry_code}`}
+          value={`wannawatch://?entry_code=${game.entry_code}`}
           size={150}
         />
       </View>
@@ -62,7 +62,7 @@ const Lobby = ({ game, serverMessages }) => {
         data={game.players}
         renderItem={({ item }) => (
           <View style={styles.playerItem}>
-            <Text style={styles.playerText}>{item.username}</Text>
+            <Text style={styles.playerText}>{item.user?.username}</Text>
           </View>
         )}
         keyExtractor={item => item.id}

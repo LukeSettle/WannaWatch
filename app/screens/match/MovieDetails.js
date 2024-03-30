@@ -35,7 +35,6 @@ function MovieDetails({ movie, autoFetch = false }) {
     fetchMovieDetails(movie.id)
       .then((data) => {
         setMovieDetails(data);
-        console.log('data', data);
         LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
         setShowFullDetails(!showFullDetails);
       })
