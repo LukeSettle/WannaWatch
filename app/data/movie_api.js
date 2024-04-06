@@ -1,7 +1,8 @@
 import axios from 'axios';
 
+const apiKey = 'fd1efe23da588e99056fdb264ca89bbd';
+
 const fetchMovieDetails = async (movieId) => {
-  const apiKey = 'fd1efe23da588e99056fdb264ca89bbd'; // Replace with your actual API key
   const urls = [
     `https://api.themoviedb.org/3/movie/${movieId}?api_key=${apiKey}`,
     `https://api.themoviedb.org/3/movie/${movieId}/watch/providers?api_key=${apiKey}`,
@@ -27,4 +28,17 @@ const fetchMovieDetails = async (movieId) => {
   }
 }
 
-export default fetchMovieDetails;
+const fetchGenres = async () => {
+  const url = `https://api.themoviedb.org/3/genre/movie/list?api_key=${apiKey}&language=en-US`;
+
+  try {
+    const response = await axios.get(url);
+    return response.data.genres;
+  }
+  catch (error) {
+    console.error('Fetching genres failed:', error);
+    throw error;
+  }
+}
+
+export { fetchMovieDetails, fetchGenres };

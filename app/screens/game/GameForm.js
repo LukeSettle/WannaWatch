@@ -1,15 +1,17 @@
 import React, { useState } from "react";
-import { Pressable, View, StyleSheet, Keyboard, Text } from "react-native";
+import { Pressable, View, ScrollView, StyleSheet, Keyboard, Text } from "react-native";
 import { Formik } from "formik";
 import { upsertGame } from "../../data/backend_client";
 import { v4 as uuidv4 } from 'uuid';
 import Error from "../../components/shared/Error";
 import ProvidersSelection from "./ProvidersSelection";
+import GeneresSelection from "./GeneresSelection";
 import globalStyles from "../../../config/styles";
 
 const GameScreen = ({ setGame, user }) => {
   const [error, setError] = useState(null);
   const [page, setPage] = useState(Math.round(Math.random() * (66 - 1) + 1));
+  const [toggleGenres, setToggleGenres] = useState(false);
 
   const options = (values) => {
     return({
@@ -30,6 +32,7 @@ const GameScreen = ({ setGame, user }) => {
       entry_code: uuidv4(),
       query: JSON.stringify(options(values)),
       user_id: user.id,
+      providers: values.providers,
     }
 
     upsertGame(gameParams)
@@ -48,13 +51,39 @@ const GameScreen = ({ setGame, user }) => {
       <Error error={error} />
       <Formik
         initialValues={{
-          providers: [],
+          providers: user.providers || [],
+          genres: [],
         }}
         onSubmit={(values) => handleSubmit(values)}
       >
-        {({ handleChange, handleBlur, submitForm, values, setValues }) => (
+        {({ submitForm, values, setValues }) => (
           <View style={styles.formContainer}>
-            <ProvidersSelection values={values} setValues={setValues} />
+            <ScrollView>
+              <Text style={globalStyles.label}>Providers</Text>
+              <ProvidersSelection values={values} setValues={setValues} />
+
+              <View style={styles.separator} />
+
+              <View style={styles.toggleButtonContainer}>
+                <Pressable
+                  style={({ pressed }) => [
+                    globalStyles.buttonContainer,
+                    pressed && globalStyles.pressedButtonContainer
+                  ]}
+                  onPress={() => setToggleGenres(!toggleGenres)}
+                >
+                  <Text style={globalStyles.buttonText}>
+                    {toggleGenres ? "Hide Genres" : "Filter By Genres"}
+                  </Text>
+                </Pressable>
+              </View>
+              {toggleGenres && (
+                <>
+                  <Text style={globalStyles.label}>Genres</Text>
+                  <GeneresSelection values={values} setValues={setValues} />
+                </>
+              )}
+            </ScrollView>
             <View style={styles.buttonContainer}>
               <Pressable
                 style={({ pressed }) => [
@@ -93,11 +122,13 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     borderRadius: 12,
     padding: 20,
+    marginBottom: 60,
     elevation: 3,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 3.5,
-  }
+  },
+
 });
 
 export default GameScreen;

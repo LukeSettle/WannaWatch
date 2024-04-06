@@ -41,7 +41,8 @@
     "react-tinder-card": "^1.6.2",
     "react-use-websocket": "3.0.0",
     "url-parse": "^1.5.10",
-    "uuid": "^9.0.1"
+    "uuid": "^9.0.1",
+    "expo-checkbox": "~2.7.0"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0"

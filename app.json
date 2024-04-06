@@ -24,7 +24,8 @@
     ],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.lsettle.WannaWatch"
+      "bundleIdentifier": "com.lsettle.WannaWatch",
+      "buildNumber": "1.0.1"
     },
     "android": {
       "adaptiveIcon": {

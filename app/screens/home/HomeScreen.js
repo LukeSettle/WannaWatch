@@ -17,7 +17,6 @@ import { UserContext } from "../../contexts/UserContext";
 
 const WelcomeScreen = ({ navigation }) => {
   const { user, setUser } = useContext(UserContext);
-  const image = require("../../assets/theater.jpg");
 
   const submitForm = (values) => {
     const userParams = {

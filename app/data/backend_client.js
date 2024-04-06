@@ -1,5 +1,5 @@
-// const BASE_URL = 'http://localhost:3000'
-const BASE_URL = 'https://wanna-watch-rails.onrender.com'
+const BASE_URL = 'http://localhost:3000'
+// const BASE_URL = 'https://wanna-watch-rails.onrender.com'
 
 function upsertUser(user) {
   const url = `${BASE_URL}/users/upsert`;

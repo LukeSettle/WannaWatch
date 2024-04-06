@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { View, Text, Image, Pressable, StyleSheet, LayoutAnimation, Platform, UIManager } from "react-native";
 import justwatch_logo from "../../assets/justwatch_logo.png";
 import PROVIDERS from "../../../config/providers";
-import fetchMovieDetails from "../../data/movie_api";
+import { fetchMovieDetails } from "../../data/backend_client";
 
 if (
   Platform.OS === "android" &&

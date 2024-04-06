@@ -19,21 +19,18 @@ const ProvidersSelection = ({ values, setValues }) => {
 
   return (
     <View style={styles.container}>
-      <FlatList
-        data={PROVIDERS}
-        keyExtractor={(item) => item.code}
-        renderItem={({ item }) => (
-          <TouchableOpacity
-            style={[
-              styles.item,
-              values.providers.includes(item.code) && styles.selectedItem,
-            ]}
-            onPress={() => toggleValue(item.code)}
-          >
-            <Text style={styles.itemText}>{item.title}</Text>
-          </TouchableOpacity>
-        )}
-      />
+      {PROVIDERS.map((item) => (
+        <TouchableOpacity
+          key={item.code}
+          style={[
+            styles.item,
+            values.providers.includes(item.code) && styles.selectedItem,
+          ]}
+          onPress={() => toggleValue(item.code)}
+        >
+          <Text style={styles.itemText}>{item.title}</Text>
+        </TouchableOpacity>
+      ))}
     </View>
   );
 };
