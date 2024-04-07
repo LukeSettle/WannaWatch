@@ -3,8 +3,8 @@ import Matching from "./Matching";
 import axios from "axios";
 import Results from "./Results";
 
-const MatchScreen = ({ game }) => {
-  const [query, _setQuery] = useState(JSON.parse(game.query));
+const MatchScreen = ({ game, setGame }) => {
+  const [query, setQuery] = useState(JSON.parse(game.query));
   const [movies, setMovies] = useState([]);
 
   const options = () => {
@@ -18,23 +18,42 @@ const MatchScreen = ({ game }) => {
   }
 
   const getMovies = async () => {
-    console.log('options', options());
     try {
       const response = await axios.request(options());
       const json = await response.data.results
-      setMovies(json);
+
+      setMovies([...movies, ...json]);
+      setGame({
+        ...game,
+        finished_at: json.length === 0 ? new Date() : null,
+      })
     } catch (error) {
       console.log(error);
     }
   };
 
-  useEffect(() => {
-    getMovies();
-  }, []);
+  const loadMoreMovies = async () => {
+    const newPage = Math.round(Math.random() * (66 - 1) + 1)
 
-  const newGame = () => {
-    navigation.navigate("Game");
+    console.log('====================================');
+    console.log('newPage', newPage);
+    console.log('====================================');
+
+    setQuery({
+      ...query,
+      params: {
+        ...query.params,
+        page: newPage,
+      }
+    });
   }
+
+  useEffect(() => {
+    console.log('====================================');
+    console.log('getMovies', query);
+    console.log('====================================');
+    getMovies();
+  }, [query]);
 
   if (!game) {
     return null;
@@ -44,7 +63,7 @@ const MatchScreen = ({ game }) => {
     <>
       {!game.finished_at
         ? movies.length > 0 && <Matching game={game} movies={movies} setMovies={setMovies} />
-        : <Results game={game} movies={movies} />
+        : <Results game={game} movies={movies} loadMoreMovies={loadMoreMovies} />
       }
     </>
   );

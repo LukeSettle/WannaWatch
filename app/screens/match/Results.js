@@ -1,14 +1,13 @@
 import React, { useState } from "react";
 import { ScrollView, View, Text, StyleSheet, Pressable, Image } from "react-native";
 import MovieDetails from "./MovieDetails";
+import colors from "../../../config/colors";
 
-const Results = ({ game, movies }) => {
-  const [showOverviewId, setShowOverviewId] = useState(false);
-
+const Results = ({ game, movies, loadMoreMovies }) => {
   const matchedMovies = () => {
     const allMovieIds = game.players.map((player) => player.liked_movie_ids);
     const matchedMovieIds = allMovieIds.reduce((a, b) => a.filter(c => b.includes(c)));
-    return movies.filter((movie) => matchedMovieIds.includes(movie.id));
+    return movies.filter((movie) => matchedMovieIds.includes(movie.id)).reverse();
   }
 
   const matchesText = () => {
@@ -27,29 +26,38 @@ const Results = ({ game, movies }) => {
     };
   };
 
+  const keepPlaying = () => {
+    loadMoreMovies();
+  }
+
   return (
-    <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer}>
-      <Text style={styles.header}>{matchesText()}</Text>
-      {matchedMovies().map((movie) => (
-        <View
-          key={movie.id}
-          style={styles.card}
-        >
-          <View style={styles.imageContainer}>
-            <Image
-              style={styles.image}
-              source={imageSource(movie)}
-            />
-          </View>
-          <View style={styles.textContainer}>
-            <Text style={styles.movieTitle}>{movie.title}</Text>
-            <View style={styles.overviewText}>
-              <MovieDetails movie={movie} />
+    <View style={styles.container}>
+      <ScrollView contentContainerStyle={styles.contentContainer}>
+        <Text style={styles.header}>{matchesText()}</Text>
+        {matchedMovies().map((movie) => (
+          <View
+            key={movie.id}
+            style={styles.card}
+          >
+            <View style={styles.imageContainer}>
+              <Image
+                style={styles.image}
+                source={imageSource(movie)}
+              />
+            </View>
+            <View style={styles.textContainer}>
+              <Text style={styles.movieTitle}>{movie.title}</Text>
+              <View style={styles.overviewText}>
+                <MovieDetails movie={movie} />
+              </View>
             </View>
           </View>
-        </View>
-      ))}
-    </ScrollView>
+        ))}
+      </ScrollView>
+      <Pressable style={styles.keepPlaying} onPress={keepPlaying}>
+        <Text style={{color: 'white'}}>Keep playing</Text>
+      </Pressable>
+    </View>
   );
 };
 
@@ -100,6 +108,21 @@ const styles = StyleSheet.create({
   overviewText: {
     fontSize: 16,
     color: '#666',
+  },
+  keepPlaying: {
+    backgroundColor: colors.primary,
+    padding: 20,
+    marginBottom: 40,
+    justifyContent: 'center',
+    alignItems: 'center',
+    elevation: 3,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    borderRadius: 10,
+    width: '80%',
+    alignSelf: 'center',
   },
 });
 export default Results;

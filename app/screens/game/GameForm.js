@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import axios from "axios";
 import { Pressable, View, ScrollView, StyleSheet, Keyboard, Text } from "react-native";
 import { Formik } from "formik";
 import { upsertGame } from "../../data/backend_client";
@@ -10,10 +11,17 @@ import globalStyles from "../../../config/styles";
 
 const GameScreen = ({ setGame, user }) => {
   const [error, setError] = useState(null);
-  const [page, setPage] = useState(Math.round(Math.random() * (66 - 1) + 1));
   const [toggleGenres, setToggleGenres] = useState(false);
 
-  const options = (values) => {
+  const options = (values, totalPages = null) => {
+    let page;
+
+    if (totalPages) {
+      page = Math.round(Math.random() * (totalPages - 1) + 1);
+    } else {
+      page = 1;
+    }
+
     return({
       method: "GET",
       url: "https://api.themoviedb.org/3/discover/movie?api_key=fd1efe23da588e99056fdb264ca89bbd",
@@ -27,13 +35,23 @@ const GameScreen = ({ setGame, user }) => {
     })
   };
 
+  const fetchTotalPages = async (values) => {
+    const response = await axios.request(options(values));
+    const totalPages = await response.data.total_pages;
+
+    return totalPages;
+  };
+
   const handleSubmit = (values) => {
     Keyboard.dismiss();
+    const totalPages = fetchTotalPages(values);
+
     const gameParams = {
       entry_code: uuidv4(),
-      query: JSON.stringify(options(values)),
+      query: JSON.stringify(options(values, totalPages)),
       user_id: user.id,
       providers: values.providers,
+      totalPages: totalPages,
     }
 
     upsertGame(gameParams)
