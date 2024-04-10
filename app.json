@@ -12,7 +12,7 @@
     ],
     "scheme": "wannawatch",
     "splash": {
-      "image": "./app/assets/splash.webp",
+      "image": "./app/assets/splash.png",
       "resizeMode": "cover",
       "backgroundColor": "#ffffff"
     },
