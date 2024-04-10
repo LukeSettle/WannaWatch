@@ -1,5 +1,7 @@
 import { StatusBar } from "expo-status-bar";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
+import { View } from "react-native";
+import colors from "./config/colors";
 import "react-native-url-polyfill/auto"
 import { StyleSheet } from "react-native";
 import HomeScreen from "./app/screens/home/HomeScreen";
@@ -12,14 +14,27 @@ import { v4 as uuidv4 } from 'uuid';
 import { UserContext } from "./app/contexts/UserContext";
 import { upsertUser } from "./app/data/backend_client";
 import * as Linking from 'expo-linking';
+import { useFonts } from 'expo-font';
+import * as SplashScreen from 'expo-splash-screen';
+
+SplashScreen.preventAutoHideAsync();
 
 const Stack = createStackNavigator();
 
 export default function App() {
   const [user, setUser] = useState(null);
   const [entryCode, setEntryCode] = useState(null);
-  const [error, setError] = useState(null);
   const [deviceId, setDeviceId] = useState(null);
+
+  const [fontsLoaded, fontError] = useFonts({
+    'Signika': require('./app/assets/fonts/Signika.ttf'),
+  });
+
+  const onLayoutRootView = useCallback(async () => {
+    if (fontsLoaded || fontError) {
+      await SplashScreen.hideAsync();
+    }
+  }, [fontsLoaded, fontError]);
 
   useEffect(() => {
     const getGameEntryCode = async () => {
@@ -64,10 +79,18 @@ export default function App() {
   }, [deviceId])
 
   return (
-    <UserContext.Provider value={{user, setUser, entryCode}}>
+    <UserContext.Provider value={{user, setUser, entryCode, onLayoutRootView}}>
       <NavigationContainer>
-        <Stack.Navigator initialRouteName={"Home"}>
-          <Stack.Screen name="Home" component={HomeScreen} />
+        <Stack.Navigator initialRouteName={"Home"} screenOptions={{
+          headerStyle: {
+            backgroundColor: colors.secondary,
+          },
+          headerTintColor: '#fff',
+          headerTitleStyle: {
+            fontWeight: 'bold',
+          },
+        }}>
+          <Stack.Screen name="Home" component={HomeScreen} options={{headerShown: false}} />
           <Stack.Screen name="Game" component={GameScreen} />
         </Stack.Navigator>
         <StatusBar style="auto" />

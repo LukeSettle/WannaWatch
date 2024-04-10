@@ -1,22 +1,22 @@
 import React, { useContext } from "react";
-import { Platform } from "react-native";
 import { Formik } from "formik";
 import {
-  Image,
   StyleSheet,
   Text,
   View,
   Pressable,
   TextInput,
+  Image,
 } from "react-native";
 import { LinearGradient } from 'expo-linear-gradient';
 import { upsertUser } from "../../data/backend_client";
 import colors from "../../../config/colors";
 import globalStyles from "../../../config/styles";
 import { UserContext } from "../../contexts/UserContext";
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view'
 
 const WelcomeScreen = ({ navigation }) => {
-  const { user, setUser } = useContext(UserContext);
+  const { user, setUser, onLayoutRootView } = useContext(UserContext);
 
   const submitForm = (values) => {
     const userParams = {
@@ -39,40 +39,47 @@ const WelcomeScreen = ({ navigation }) => {
 
   return (
     <LinearGradient
-        colors={[colors.secondary, 'transparent']}
+        colors={[colors.primary, colors.secondary, colors.red,]}
         style={styles.background}
     >
-      <View>
-        <Text style={styles.headerText}>So... what do you wanna watch?</Text>
-        <Formik
-          initialValues={{
-            username: user.username || "",
-          }}
-          onSubmit={(values) => submitForm(values)}
-        >
-          {({ handleChange, handleBlur, submitForm, values }) => (
-            <View style={styles.formContainer}>
-              <TextInput
-                style={styles.input}
-                onChangeText={handleChange('username')}
-                onBlur={handleBlur('username')}
-                value={values.username}
-                placeholder="Enter your name"
-                placeholderTextColor="#aaa"
-              />
-              <Pressable
-                style={({ pressed }) => [
-                  globalStyles.buttonContainer,
-                  pressed && globalStyles.pressedButtonContainer
-                ]}
-                onPress={submitForm}
-              >
-                <Text style={globalStyles.buttonText}>Start Matching</Text>
-              </Pressable>
-            </View>
-          )}
-        </Formik>
-      </View>
+      <KeyboardAwareScrollView contentContainerStyle={styles.background}>
+        <View onLayout={onLayoutRootView}>
+          <Image
+            source={require("../../assets/icon.png")}
+            style={styles.image}
+          />
+
+          <Text style={styles.headerText}>So... what do you wanna watch?</Text>
+          <Formik
+            initialValues={{
+              username: user.username || "",
+            }}
+            onSubmit={(values) => submitForm(values)}
+          >
+            {({ handleChange, handleBlur, submitForm, values }) => (
+              <View style={styles.formContainer}>
+                <TextInput
+                  style={styles.input}
+                  onChangeText={handleChange('username')}
+                  onBlur={handleBlur('username')}
+                  value={values.username}
+                  placeholder="Enter your name"
+                  placeholderTextColor="#aaa"
+                />
+                <Pressable
+                  style={({ pressed }) => [
+                    globalStyles.buttonContainer,
+                    pressed && globalStyles.pressedButtonContainer
+                  ]}
+                  onPress={submitForm}
+                >
+                  <Text style={globalStyles.buttonText}>Start Matching</Text>
+                </Pressable>
+              </View>
+            )}
+          </Formik>
+        </View>
+      </KeyboardAwareScrollView>
     </LinearGradient>
   );
 };
@@ -83,13 +90,22 @@ const styles = StyleSheet.create({
   background: {
     flex: 1,
     justifyContent: 'center',
+    alignItems: 'center',
+  },
+  image: {
+    width: 100,
+    height: 100,
+    alignSelf: 'center',
+    marginBottom: 20,
+    borderRadius: 25,
   },
   headerText: {
     fontSize: 40,
-    color: '#e74c3c',
+    color: colors.flame,
     textAlign: 'center',
     marginBottom: 20,
-    fontFamily: Platform.OS === "ios" ? "Baskerville-SemiBoldItalic" : "serif",
+    fontFamily: "Signika",
+    fontSize: 50,
   },
   formContainer: {
     backgroundColor: '#f0f0f0',

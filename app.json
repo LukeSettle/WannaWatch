@@ -42,7 +42,13 @@
     },
     "description": "WannaWatch helps you and your significant other choose what to watch on date night! ",
     "plugins": [
-      "expo-secure-store"
+      "expo-secure-store",
+      [
+        "expo-font",
+        {
+          "fonts": ["./app/assets/fonts/Signika.ttf"]
+        }
+      ]
     ]
   }
 }
