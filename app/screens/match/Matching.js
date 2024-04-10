@@ -2,14 +2,10 @@ import React, { useContext, useEffect, useState } from "react";
 import {
   View,
   StyleSheet,
-  Pressable,
-  Text,
 } from "react-native";
 import Movie from "./Movie";
-import { UserContext } from "../../contexts/UserContext";
 import { SocketContext } from "../../contexts/SocketContext";
 import Ionicons from '@expo/vector-icons/Ionicons';
-import globalStyles from "../../../config/styles";
 
 const Matching = ({ game, movies, setMovies }) => {
   const [updateMovieParams, setUpdateMovieParams] = useState(null);

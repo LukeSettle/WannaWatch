@@ -37,7 +37,7 @@ const GameScreen = () => {
   return (
     <SocketProvider handleMessage={handleMessage} user={user} game={game} serverMessages={serverMessages}>
       {game.started_at
-        ? <MatchScreen game={game} setGame={setGame} />
+        ? <MatchScreen game={game} setGame={setGame} user={user} />
         : <Lobby game={game} serverMessages={serverMessages} />
       }
     </SocketProvider>

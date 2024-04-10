@@ -43,9 +43,13 @@ const GameScreen = ({ setGame, user }) => {
     return totalPages;
   };
 
-  const handleSubmit = (values) => {
+  const handleSubmit = async (values) => {
     Keyboard.dismiss();
-    const totalPages = fetchTotalPages(values);
+    const totalPages = await fetchTotalPages(values);
+
+    console.log('====================================');
+    console.log('totalPages', totalPages);
+    console.log('====================================');
 
     const gameParams = {
       entry_code: uuidv4(),

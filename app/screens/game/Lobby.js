@@ -42,7 +42,8 @@ const Lobby = ({ game, serverMessages }) => {
       <Text style={styles.instructionText}>Scan code to join game</Text>
       <View style={styles.qrCodeContainer}>
         <QRCode
-          value={`wannawatch://?entry_code=${game.entry_code}`}
+          // value={`wannawatch://?entry_code=${game.entry_code}`}
+          value={`exp://192.168.86.20:8081?entry_code=${game.entry_code}`}
           size={150}
         />
       </View>
