@@ -2,14 +2,13 @@ import React, { useEffect, useState } from "react";
 import Matching from "./Matching";
 import axios from "axios";
 import Results from "./Results";
+import Waiting from "./Waiting";
+import { keepPlaying } from "../../data/backend_client";
 
 const MatchScreen = ({ game, setGame, user }) => {
   const [query, setQuery] = useState(JSON.parse(game.query));
   const [movies, setMovies] = useState([]);
-
-  const userFinishedMatching = () => (
-    game.players.find(player => player.user.id === user.id).finished_matching
-  )
+  const [userFinishedMatching, setUserFinishedMatching] = useState(false);
 
   const options = () => {
     const parsedOptions = query;
@@ -39,18 +38,36 @@ const MatchScreen = ({ game, setGame, user }) => {
   const loadMoreMovies = async () => {
     const newPage = Math.round(Math.random() * (66 - 1) + 1)
 
-    setQuery({
-      ...query,
-      params: {
-        ...query.params,
-        page: newPage,
-      }
-    });
+    const params = {
+      user_id: user.id,
+      game_id: game.id,
+    }
+
+    keepPlaying(params)
+      .then(() => {
+        setQuery({
+          ...query,
+          params: {
+            ...query.params,
+            page: newPage,
+          }
+        });
+      })
   }
 
   useEffect(() => {
     getMovies();
   }, [query]);
+
+  useEffect(() => {
+    const currentPlayer = game.players.find(player => player.user.id === user?.id);
+
+    if (currentPlayer && currentPlayer.finished_at !== null) {
+      setUserFinishedMatching(true)
+    } else {
+      setUserFinishedMatching(false)
+    }
+  }, [game]);
 
   if (!game) {
     return null;
@@ -60,7 +77,7 @@ const MatchScreen = ({ game, setGame, user }) => {
     return <Results game={game} movies={movies} loadMoreMovies={loadMoreMovies} />;
   }
 
-  if (userFinishedMatching()) {
+  if (userFinishedMatching) {
     return <Waiting />
   }
 

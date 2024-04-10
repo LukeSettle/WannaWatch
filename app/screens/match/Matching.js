@@ -65,7 +65,7 @@ const Matching = ({ game, movies, setMovies }) => {
 
   return (
     <View style={styles.outer_container}>
-      <View style={styles.container}>
+      <View key={'unique'} style={styles.container}>
         {(filteredMovies || []).map((movie, index) => (
           <Movie
             key={movie.id}

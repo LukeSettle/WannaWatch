@@ -85,10 +85,37 @@ function findGameFromEntryCode(entryCode) {
     });
 }
 
+function keepPlaying(params) {
+  const url = `${BASE_URL}/games/keep_playing`;
+
+  const fetchOptions = {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(params),
+  };
+
+  return fetch(url, fetchOptions)
+    .then(response => {
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
+      }
+      return response.json();
+    })
+    .then(data => {
+      return data;
+    })
+    .catch(error => {
+      console.error('Error keeping playing:', error);
+      throw error;
+    });
+}
 
 
 module.exports = {
   upsertUser,
   upsertGame,
   findGameFromEntryCode,
+  keepPlaying,
 }
