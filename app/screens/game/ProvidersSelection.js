@@ -1,6 +1,7 @@
 import React from "react";
-import { FlatList, TouchableOpacity, View, Text, StyleSheet } from "react-native";
+import { TouchableOpacity, View, Text, StyleSheet } from "react-native";
 import PROVIDERS from "../../../config/providers";
+import colors from "../../../config/colors";
 
 const ProvidersSelection = ({ values, setValues }) => {
   const toggleValue = (code) => {
@@ -28,7 +29,7 @@ const ProvidersSelection = ({ values, setValues }) => {
           ]}
           onPress={() => toggleValue(item.code)}
         >
-          <Text style={styles.itemText}>{item.title}</Text>
+          <Text style={[styles.itemText, values.providers.includes(item.code) && styles.selectedItemText,]}>{item.title}</Text>
         </TouchableOpacity>
       ))}
     </View>
@@ -38,7 +39,6 @@ const ProvidersSelection = ({ values, setValues }) => {
 const styles = StyleSheet.create({
   container: {
     backgroundColor: '#f0f0f0',
-    borderRadius: 10,
     overflow: 'hidden',
   },
   item: {
@@ -47,9 +47,13 @@ const styles = StyleSheet.create({
     borderBottomColor: '#e0e0e0',
     paddingVertical: 15,
     paddingHorizontal: 20,
+    marginVertical: 2,
   },
   selectedItem: {
-    backgroundColor: '#28a745',
+    backgroundColor: colors.secondary,
+  },
+  selectedItemText: {
+    color: colors.white,
   },
   itemText: {
     fontSize: 18,

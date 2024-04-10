@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, StyleSheet } from "react-native"; // Add the missing import statement for StyleSheet
-import Checkbox from 'expo-checkbox';
+import { TouchableOpacity, View, Text, StyleSheet } from "react-native"; // Add the missing import statement for StyleSheet
 import { fetchGenres } from "../../data/movie_api";
+import colors from "../../../config/colors";
 
 const GenreSelection = ({ values, setValues }) => {
   const [genres, setGenres] = useState([]);
@@ -9,50 +9,63 @@ const GenreSelection = ({ values, setValues }) => {
   useEffect(() => {
     fetchGenres().then((data) => {
       setGenres(data)
-      setValues({ ...values, genres: data.map((genre) => genre.id) });
     });
   }, []);
 
-  const handleGenreChange = (genre) => {
-    const updatedGenres = values.genres.includes(genre)
-      ? values.genres.filter((g) => g !== genre)
-      : [...values.genres, genre];
-    setValues({ ...values, genres: updatedGenres });
+  const toggleValue = (id) => {
+    if (values.genres.includes(id)) {
+      setValues({
+        ...values,
+        genres: values.genres.filter((genre) => genre !== id)
+      })
+    } else {
+      setValues({
+        ...values,
+        genres: [...values.genres, id]
+      })
+    }
   };
 
   return (
-    <View style={styles.genreContainer}>
+    <View style={styles.container}>
       {genres?.map((genre) => (
-        <View key={genre.id} style={styles.genreItem}>
-          <Checkbox
-            value={values.genres.includes(genre.id)}
-            onValueChange={() => handleGenreChange(genre.id)}
-          />
-          <Text style={styles.genreText}>{genre.name}</Text>
-        </View>
+        <TouchableOpacity
+          key={genre.id}
+          style={[
+            styles.item,
+            values.genres.includes(genre.id) && styles.selectedItem,
+          ]}
+          onPress={() => toggleValue(genre.id)}
+        >
+          <Text style={[styles.itemText, values.genres.includes(genre.id) && styles.selectedItemText,]}>{genre.name}</Text>
+        </TouchableOpacity>
       ))}
     </View>
   );
 };
 
 const styles = StyleSheet.create({ // Wrap the styles object in StyleSheet.create()
-  genreContainer: {
-    backgroundColor: "#f0f0f0",
-    borderRadius: 10,
-    overflow: "hidden",
+  container: {
+    backgroundColor: '#f0f0f0',
+    overflow: 'hidden',
   },
-  genreItem: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "#ffffff",
+  item: {
+    backgroundColor: '#ffffff',
     borderBottomWidth: 1,
-    borderBottomColor: "#e0e0e0",
+    borderBottomColor: '#e0e0e0',
     paddingVertical: 15,
     paddingHorizontal: 20,
+    marginVertical: 2,
   },
-  genreText: {
+  selectedItem: {
+    backgroundColor: colors.secondary,
+  },
+  selectedItemText: {
+    color: colors.white,
+  },
+  itemText: {
     fontSize: 18,
-    color: "#333333",
+    color: '#333333',
   },
 });
 

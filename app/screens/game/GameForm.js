@@ -8,6 +8,7 @@ import Error from "../../components/shared/Error";
 import ProvidersSelection from "./ProvidersSelection";
 import GeneresSelection from "./GeneresSelection";
 import globalStyles from "../../../config/styles";
+import colors from "../../../config/colors";
 
 const GameScreen = ({ setGame, user }) => {
   const [error, setError] = useState(null);
@@ -29,7 +30,7 @@ const GameScreen = ({ setGame, user }) => {
         with_watch_providers: values.providers.join('|'),
         watch_region: 'US',
         with_origin_country: 'US',
-        with_genres: values.genres.join('|'),
+        with_genres: toggleGenres ? values.genres.join('|') : null,
         page: page,
       },
     })
@@ -77,7 +78,7 @@ const GameScreen = ({ setGame, user }) => {
       >
         {({ submitForm, values, setValues }) => (
           <View style={styles.formContainer}>
-            <ScrollView>
+            <ScrollView contentContainerStyle={styles.filtersContainer}>
               <Text style={globalStyles.label}>Providers</Text>
               <ProvidersSelection values={values} setValues={setValues} />
 
@@ -86,36 +87,38 @@ const GameScreen = ({ setGame, user }) => {
               <View style={styles.toggleButtonContainer}>
                 <Pressable
                   style={({ pressed }) => [
-                    globalStyles.buttonContainer,
-                    pressed && globalStyles.pressedButtonContainer
+                    styles.toggleContainer,
+                    pressed && styles.pressedToggleContainer,
+                    toggleGenres && styles.pressedToggleContainer,
                   ]}
                   onPress={() => setToggleGenres(!toggleGenres)}
                 >
-                  <Text style={globalStyles.buttonText}>
+                  <Text style={styles.toggleText}>
                     {toggleGenres ? "Hide Genres" : "Filter By Genres"}
                   </Text>
                 </Pressable>
               </View>
               {toggleGenres && (
-                <>
+                <View>
                   <Text style={globalStyles.label}>Genres</Text>
                   <GeneresSelection values={values} setValues={setValues} />
-                </>
+                </View>
               )}
             </ScrollView>
+
             <View style={styles.buttonContainer}>
-              <Pressable
-                style={({ pressed }) => [
-                  globalStyles.buttonContainer,
-                  pressed && globalStyles.pressedButtonContainer
-                ]}
-                onPress={submitForm}
-              >
-                <Text style={globalStyles.buttonText}>Create Game</Text>
-              </Pressable>
+                <Pressable
+                  style={({ pressed }) => [
+                    globalStyles.buttonContainer,
+                    pressed && globalStyles.pressedButtonContainer
+                  ]}
+                  onPress={submitForm}
+                >
+                  <Text style={globalStyles.buttonText}>Create Game</Text>
+                </Pressable>
+              </View>
             </View>
-          </View>
-        )}
+          )}
       </Formik>
     </View>
   );
@@ -136,18 +139,40 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   formContainer: {
+    flex: 1,
+    gap: 20,
     width: '100%',
     maxWidth: 400,
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    padding: 20,
-    marginBottom: 60,
+    marginBottom: 80,
     elevation: 3,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 3.5,
   },
-
+  filtersContainer: {
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    padding: 20,
+  },
+  separator: {
+    height: 20,
+  },
+  toggleButtonContainer: {
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  toggleContainer: {
+    padding: 10,
+    borderRadius: 5,
+    backgroundColor: colors.primary,
+  },
+  pressedToggleContainer: {
+    backgroundColor: colors.secondary,
+  },
+  toggleText: {
+    color: '#ffffff',
+    fontSize: 16,
+  },
 });
 
 export default GameScreen;
