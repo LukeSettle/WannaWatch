@@ -8,10 +8,10 @@ import {
   View,
   Pressable,
   TextInput,
-  ImageBackground,
 } from "react-native";
+import { LinearGradient } from 'expo-linear-gradient';
 import { upsertUser } from "../../data/backend_client";
-import logo from "../../assets/logo.png";
+import colors from "../../../config/colors";
 import globalStyles from "../../../config/styles";
 import { UserContext } from "../../contexts/UserContext";
 
@@ -38,9 +38,11 @@ const WelcomeScreen = ({ navigation }) => {
   if (!user) return null;
 
   return (
-    <ImageBackground source={require("../../assets/theater.jpg")} style={styles.backgroundImage}>
-      <View style={styles.overlay}>
-        <Image source={logo} style={styles.logo} />
+    <LinearGradient
+        colors={[colors.secondary, 'transparent']}
+        style={styles.background}
+    >
+      <View>
         <Text style={styles.headerText}>So... what do you wanna watch?</Text>
         <Formik
           initialValues={{
@@ -71,29 +73,16 @@ const WelcomeScreen = ({ navigation }) => {
           )}
         </Formik>
       </View>
-    </ImageBackground>
+    </LinearGradient>
   );
 };
 
 export default WelcomeScreen;
 
 const styles = StyleSheet.create({
-  logo: {
-    width: 150,
-    height: 150,
-    alignSelf: 'center',
-    marginBottom: 20,
-    borderRadius: 40,
-  },
-  backgroundImage: {
+  background: {
     flex: 1,
     justifyContent: 'center',
-  },
-  overlay: {
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    flex: 1,
-    justifyContent: 'center',
-    padding: 20,
   },
   headerText: {
     fontSize: 40,
@@ -106,7 +95,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#f0f0f0',
     borderRadius: 10,
     padding: 20,
-    marginBottom: 20,
+    margin: 20,
   },
   input: {
     borderColor: '#ddd',

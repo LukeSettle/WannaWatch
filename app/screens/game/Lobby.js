@@ -29,7 +29,7 @@ const Lobby = ({ game, serverMessages }) => {
   useEffect(() => {
     if (!game || !game.players ) return;
 
-    const player = game.players.find(player => player.user_id === user.id);
+    const player = game.players.find(player => player.user.id === user.id);
 
     if (player) {
       setGameReady(true);

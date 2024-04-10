@@ -12,8 +12,8 @@
     ],
     "scheme": "wannawatch",
     "splash": {
-      "image": "./app/assets/splash.png",
-      "resizeMode": "contain",
+      "image": "./app/assets/splash.webp",
+      "resizeMode": "cover",
       "backgroundColor": "#ffffff"
     },
     "updates": {
@@ -25,7 +25,7 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.lsettle.WannaWatch",
-      "buildNumber": "1.0.1"
+      "buildNumber": "1.0.3"
     },
     "android": {
       "adaptiveIcon": {

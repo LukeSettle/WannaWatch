@@ -1,10 +1,9 @@
 import React, { createContext, useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
-import axios from 'axios';
 const SocketContext = createContext({ webSocket: null });
 
 const SocketProvider = ({ handleMessage, user, game, children }) => {
-  // const WS_BASE_URL = `http://localhost:3000/cable?user_id=${user.id}`;
+  // const WS_BASE_URL = `https://aphid-one-kangaroo.ngrok-free.app/cable?user_id=${user.id}`;
   const WS_BASE_URL = `https://wanna-watch-rails.onrender.com/cable?user_id=${user.id}`;
   const [webSocket, setWebSocket] = useState();
 
