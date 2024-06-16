@@ -12,25 +12,33 @@ function upsertUser(user) {
     body: JSON.stringify(user), // Convert the user object to a JSON string
   };
 
-  // Make the fetch request to the Rails server
-  return fetch(url, fetchOptions)
-    .then(response => {
-      if (!response.ok) {
-        throw new Error('Network response was not ok');
-      }
-      return response.json(); // Parse the JSON response body
-    })
-    .then(data => {
-      // The 'data' variable contains the response from the server
-      return data; // This could be the updated or newly created user object
-    })
-    .catch(error => {
-      console.error('Error upserting user:', error);
-      throw error;
-    });
+  // Function to retry the fetch request
+  const retryFetch = (url, fetchOptions, retries) => {
+    return fetch(url, fetchOptions)
+      .then(response => {
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+        return response.json(); // Parse the JSON response body
+      })
+      .then(data => {
+        // The 'data' variable contains the response from the server
+        return data; // This could be the updated or newly created user object
+      })
+      .catch(error => {
+        console.error('Error upserting user:', error);
+        if (retries > 0) {
+          console.log(`Retrying request (${retries} retries left)...`);
+          return retryFetch(url, fetchOptions, retries - 1);
+        } else {
+          throw error;
+        }
+      });
+  };
+
+  // Make the fetch request with retries
+  return retryFetch(url, fetchOptions, 3);
 }
-
-
 
 function upsertGame(game) {
   const url = `${BASE_URL}/games/upsert`;
@@ -43,20 +51,31 @@ function upsertGame(game) {
     body: JSON.stringify(game),
   };
 
-  return fetch(url, fetchOptions)
-    .then(response => {
-      if (!response.ok) {
-        throw new Error('Network response was not ok');
-      }
-      return response.json();
-    })
-    .then(data => {
-      return data;
-    })
-    .catch(error => {
-      console.error('Error upserting game:', error);
-      throw error;
-    });
+  // Function to retry the fetch request
+  const retryFetch = (url, fetchOptions, retries) => {
+    return fetch(url, fetchOptions)
+      .then(response => {
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+        return response.json();
+      })
+      .then(data => {
+        return data;
+      })
+      .catch(error => {
+        console.error('Error upserting game:', error);
+        if (retries > 0) {
+          console.log(`Retrying request (${retries} retries left)...`);
+          return retryFetch(url, fetchOptions, retries - 1);
+        } else {
+          throw error;
+        }
+      });
+  };
+
+  // Make the fetch request with retries
+  return retryFetch(url, fetchOptions, 3);
 }
 
 function findGameFromEntryCode(entryCode) {

@@ -1,5 +1,6 @@
 import React, { useContext, useState, useEffect } from "react";
 import QRCode from 'react-native-qrcode-svg';
+import * as Clipboard from 'expo-clipboard';
 import { Pressable, FlatList, Text, View, StyleSheet } from "react-native";
 import { UserContext } from "../../contexts/UserContext";
 import { SocketContext } from "../../contexts/SocketContext";
@@ -10,6 +11,7 @@ const Lobby = ({ game, serverMessages }) => {
   const { webSocket } = useContext(SocketContext);
   const [gameReady, setGameReady] = useState(false);
   const [userReady, setUserReady] = useState(false);
+  const [link, setLink] = useState('');
 
   const sendReadyMessage = () => {
     setUserReady(true);
@@ -26,6 +28,12 @@ const Lobby = ({ game, serverMessages }) => {
     );
   }
 
+  const copyToClipboard = async () => {
+    await Clipboard.setStringAsync(link);
+
+    alert('Link copied to clipboard');
+  };
+
   useEffect(() => {
     if (!game || !game.players ) return;
 
@@ -34,6 +42,8 @@ const Lobby = ({ game, serverMessages }) => {
     if (player) {
       setGameReady(true);
     }
+    // setLink(`wannawatch://?entry_code=${game.entry_code}`);
+    setLink(`exp://192.168.86.21:8081?entry_code=${game.entry_code}`);
   }, [game]);
 
   return (
@@ -41,11 +51,18 @@ const Lobby = ({ game, serverMessages }) => {
       <Text style={styles.header}>Lobby</Text>
       <Text style={styles.instructionText}>Scan code to join game</Text>
       <View style={styles.qrCodeContainer}>
-        <QRCode
-          // value={`wannawatch://?entry_code=${game.entry_code}`}
-          value={`exp://192.168.86.20:8081?entry_code=${game.entry_code}`}
-          size={150}
-        />
+        {link &&
+          <>
+            <QRCode
+              value={link}
+              size={150}
+            />
+
+            <Pressable style={[globalStyles.buttonContainer, { margin: 10 }]} onPress={copyToClipboard}>
+              <Text style={globalStyles.buttonText}>Copy Link</Text>
+            </Pressable>
+          </>
+        }
       </View>
       <Pressable
         style={({ pressed }) => [

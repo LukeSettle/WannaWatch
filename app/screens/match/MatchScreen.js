@@ -26,10 +26,6 @@ const MatchScreen = ({ game, setGame, user }) => {
       const json = await response.data.results
 
       setMovies([...movies, ...json]);
-      setGame({
-        ...game,
-        finished_at: json.length === 0 ? new Date() : null,
-      })
     } catch (error) {
       console.log(error);
     }
@@ -41,23 +37,31 @@ const MatchScreen = ({ game, setGame, user }) => {
     const params = {
       user_id: user.id,
       game_id: game.id,
-    }
-
-    keepPlaying(params)
-      .then(() => {
-        setQuery({
+      game: {
+        query: JSON.stringify({
           ...query,
           params: {
             ...query.params,
             page: newPage,
           }
-        });
+        })
+      }
+    }
+
+    keepPlaying(params)
+      .then(() => {
+        console.log('====================================');
+        console.log('Keep playing initiated', params);
+        console.log('====================================');
       })
   }
 
   useEffect(() => {
+    if (game.finished_at !== null) {
+      return;
+    }
     getMovies();
-  }, [query]);
+  }, [game.finished_at]);
 
   useEffect(() => {
     const currentPlayer = game.players.find(player => player.user.id === user?.id);
