@@ -9,17 +9,27 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 
 const Matching = ({ game, movies, setMovies }) => {
   const [updateMovieParams, setUpdateMovieParams] = useState(null);
-  const [filteredMovies, setFilteredMovies] = useState(null);
-  const [likedMovies, setLikedMovies] = useState([]);
   const { webSocket } = useContext(SocketContext);
 
   const nopeCurrentMovie = () => {
-    setUpdateMovieParams({ id: filteredMovies.slice(-1)[0].id, liked: false });
+    setUpdateMovieParams({ id: filteredMovies().slice(-1)[0].id, liked: false });
   };
 
   const likeCurrentMovie = () => {
-    setUpdateMovieParams({ id: filteredMovies.slice(-1)[0].id, liked: true });
+    setUpdateMovieParams({ id: filteredMovies().slice(-1)[0].id, liked: true });
   };
+
+  const likedMovies = () => {
+    if (movies == null) return [];
+
+    return movies.filter((movie) => movie.liked === true);
+  }
+
+  const filteredMovies = () => {
+    if (movies == null) return null;
+
+    return movies.filter((movie) => movie.hidden !== true);
+  }
 
   useEffect(() => {
     if (!updateMovieParams) return;
@@ -34,12 +44,9 @@ const Matching = ({ game, movies, setMovies }) => {
   }, [updateMovieParams]);
 
   useEffect(() => {
-    setLikedMovies(movies.filter((movie) => movie.liked === true))
-    setFilteredMovies(movies.filter((movie) => movie.hidden !== true));
-  }, [movies])
+    const unswipedMoviesCount = movies.filter((movie) => movie.liked === undefined).length
 
-  useEffect(() => {
-    if (filteredMovies == null || filteredMovies.length !== 0) return;
+    if (unswipedMoviesCount > 0 || filteredMovies() == null || filteredMovies().length !== 0) return;
 
     webSocket.send(
       JSON.stringify(
@@ -51,13 +58,13 @@ const Matching = ({ game, movies, setMovies }) => {
           data: JSON.stringify(
             {
               action: 'finish_matching',
-              liked_movie_ids: likedMovies.map((movie) => movie.id)
+              liked_movie_ids: likedMovies().map((movie) => movie.id)
             }
           )
         }
       )
     );
-  }, [filteredMovies]);
+  }, [movies]);
 
   if (movies.length === 0) {
     return null;
@@ -66,7 +73,7 @@ const Matching = ({ game, movies, setMovies }) => {
   return (
     <View style={styles.outer_container}>
       <View key={'unique'} style={styles.container}>
-        {(filteredMovies || []).map((movie, index) => (
+        {(filteredMovies() || []).map((movie, index) => (
           <Movie
             key={movie.id}
             movie={movie}

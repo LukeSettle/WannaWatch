@@ -23,16 +23,24 @@ const GameScreen = ({ setGame, user }) => {
       page = 1;
     }
 
+    params = {
+      with_origin_country: 'US',
+      page: page,
+    }
+
+    if (values.providers.length > 0) {
+      params.with_watch_providers = values.providers.join(',');
+      params.watch_region = 'US';
+    }
+
+    if (toggleGenres && values.genres.length > 0) {
+      params.with_genres = values.genres.join(',');
+    }
+
     return({
       method: "GET",
       url: "https://api.themoviedb.org/3/discover/movie?api_key=fd1efe23da588e99056fdb264ca89bbd",
-      params: {
-        with_watch_providers: values.providers.join('|'),
-        watch_region: 'US',
-        with_origin_country: 'US',
-        with_genres: toggleGenres ? values.genres.join('|') : null,
-        page: page,
-      },
+      params
     })
   };
 
@@ -46,10 +54,6 @@ const GameScreen = ({ setGame, user }) => {
   const handleSubmit = async (values) => {
     Keyboard.dismiss();
     const totalPages = await fetchTotalPages(values);
-
-    console.log('====================================');
-    console.log('totalPages', totalPages);
-    console.log('====================================');
 
     const gameParams = {
       entry_code: uuidv4(),

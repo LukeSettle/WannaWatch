@@ -1,9 +1,9 @@
-import React, { useState } from "react";
+import React from "react";
 import { ScrollView, View, Text, StyleSheet, Pressable, Image } from "react-native";
 import MovieDetails from "./MovieDetails";
 import colors from "../../../config/colors";
 
-const Results = ({ game, movies, loadMoreMovies }) => {
+const Results = ({ game, movies, requestKeepPlaying }) => {
   const matchedMovies = () => {
     const allMovieIds = game.players.map((player) => player.liked_movie_ids);
     const matchedMovieIds = allMovieIds.reduce((a, b) => a.filter(c => b.includes(c)));
@@ -25,10 +25,6 @@ const Results = ({ game, movies, loadMoreMovies }) => {
       uri: `https://image.tmdb.org/t/p/w500/${movie.poster_path}`,
     };
   };
-
-  const keepPlaying = () => {
-    loadMoreMovies();
-  }
 
   return (
     <View style={styles.container}>
@@ -54,7 +50,7 @@ const Results = ({ game, movies, loadMoreMovies }) => {
           </View>
         ))}
       </ScrollView>
-      <Pressable style={styles.keepPlaying} onPress={keepPlaying}>
+      <Pressable style={styles.keepPlaying} onPress={requestKeepPlaying}>
         <Text style={{color: 'white'}}>Keep playing</Text>
       </Pressable>
     </View>
