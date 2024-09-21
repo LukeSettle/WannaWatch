@@ -131,10 +131,58 @@ function keepPlaying(params) {
     });
 }
 
+function friendsIndex(params) {
+  const url = `${BASE_URL}/friends/index?user_id=${params.user_id}`;
+
+  const fetchOptions = {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  };
+
+  return fetch(url, fetchOptions)
+    .then(response => {
+      return response.json();
+    })
+    .then(data => {
+      return data;
+    })
+    .catch(error => {
+      console.error('Error getting friends:', error);
+      throw error;
+    });
+}
+
+function friendsMovieIds(params) {
+  const url = `${BASE_URL}/friends/movie_ids?friend_id=${params.friend_id}&user_id=${params.user_id}`;
+
+  const fetchOptions = {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  };
+
+  return fetch(url, fetchOptions)
+    .then(response => {
+      return response.json();
+    })
+    .then(data => {
+      return data;
+    })
+    .catch(error => {
+      console.error('Error getting friends movies ids:', error);
+      throw error;
+    });
+}
+
 
 module.exports = {
   upsertUser,
   upsertGame,
   findGameFromEntryCode,
   keepPlaying,
+  friendsIndex,
+  friendsMovieIds,
 }

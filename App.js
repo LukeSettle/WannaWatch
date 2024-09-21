@@ -6,6 +6,8 @@ import "react-native-url-polyfill/auto"
 import { StyleSheet } from "react-native";
 import HomeScreen from "./app/screens/home/HomeScreen";
 import GameScreen from "./app/screens/game/GameScreen";
+import FriendsListScreen from "./app/screens/list/FriendsListScreen";
+import SharedMoviesScreen from "./app/screens/list/SharedMoviesScreen";
 import { NavigationContainer } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
 import * as SecureStore from 'expo-secure-store';
@@ -39,11 +41,9 @@ export default function App() {
   useEffect(() => {
     const getGameEntryCode = async () => {
       const url = await Linking.getInitialURL();
-      console.log('initialURl', url);
       if (!url) return;
       const { queryParams } = Linking.parse(url);
       const { entry_code } = queryParams;
-      console.log('entry_code', entry_code);
 
       if (entry_code) { setEntryCode(entry_code) }
     }
@@ -92,6 +92,8 @@ export default function App() {
         }}>
           <Stack.Screen name="Home" component={HomeScreen} options={{headerShown: false}} />
           <Stack.Screen name="Game" component={GameScreen} />
+          <Stack.Screen name="Friends List" component={FriendsListScreen} />
+          <Stack.Screen name="Shared Movies" component={SharedMoviesScreen} />
         </Stack.Navigator>
         <StatusBar style="auto" />
       </NavigationContainer>

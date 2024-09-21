@@ -43,7 +43,7 @@ const Lobby = ({ game, serverMessages }) => {
       setGameReady(true);
     }
     setLink(`wannawatch://?entry_code=${game.entry_code}`);
-    // setLink(`exp://192.168.86.21:8081?entry_code=${game.entry_code}`);
+    // setLink(`exp://192.168.86.27:8081?entry_code=${game.entry_code}`);
   }, [game]);
 
   return (

@@ -17,11 +17,7 @@ const GameScreen = ({ setGame, user }) => {
   const options = (values, totalPages = null) => {
     let page;
 
-    if (totalPages) {
-      page = Math.round(Math.random() * (totalPages - 1) + 1);
-    } else {
-      page = 1;
-    }
+    page = Math.floor(Math.random() * 50) + 1;
 
     params = {
       with_origin_country: 'US',
@@ -29,12 +25,12 @@ const GameScreen = ({ setGame, user }) => {
     }
 
     if (values.providers.length > 0) {
-      params.with_watch_providers = values.providers.join(',');
+      params.with_watch_providers = values.providers.join('|');
       params.watch_region = 'US';
     }
 
     if (toggleGenres && values.genres.length > 0) {
-      params.with_genres = values.genres.join(',');
+      params.with_genres = values.genres.join('|');
     }
 
     return({
@@ -44,23 +40,23 @@ const GameScreen = ({ setGame, user }) => {
     })
   };
 
-  const fetchTotalPages = async (values) => {
-    const response = await axios.request(options(values));
-    const totalPages = await response.data.total_pages;
+  // const fetchTotalPages = async (values) => {
+  //   const response = await axios.request(options(values));
+  //   const totalPages = await response.data.total_pages;
 
-    return totalPages;
-  };
+  //   return totalPages;
+  // };
 
   const handleSubmit = async (values) => {
     Keyboard.dismiss();
-    const totalPages = await fetchTotalPages(values);
+    // const totalPages = await fetchTotalPages(values);
 
     const gameParams = {
       entry_code: uuidv4(),
-      query: JSON.stringify(options(values, totalPages)),
+      query: JSON.stringify(options(values)),
       user_id: user.id,
-      providers: values.providers,
-      totalPages: totalPages,
+      providers: values.providers
+      // totalPages: totalPages,
     }
 
     upsertGame(gameParams)

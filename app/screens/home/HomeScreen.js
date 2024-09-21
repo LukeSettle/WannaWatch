@@ -78,6 +78,17 @@ const WelcomeScreen = ({ navigation }) => {
               </View>
             )}
           </Formik>
+
+          <Pressable
+            style={({ pressed }) => [
+              globalStyles.buttonContainer,
+              pressed && globalStyles.pressedButtonContainer,
+              styles.linkButton
+            ]}
+            onPress={() => navigation.navigate('Friends List')}
+          >
+            <Text style={styles.linkText}>View Matches</Text>
+          </Pressable>
         </View>
       </KeyboardAwareScrollView>
     </LinearGradient>

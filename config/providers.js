@@ -3,7 +3,7 @@
       title: "Netflix", code: "8"
     },
     {
-      title: "HBO Max", code: "1899"
+      title: "Max", code: "1899"
     },
     {
       title: "Hulu", code: "15"

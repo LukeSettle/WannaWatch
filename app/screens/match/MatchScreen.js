@@ -16,7 +16,7 @@ const MatchScreen = ({ game, user }) => {
       ...parsedOptions,
       params: {
         ...parsedOptions.params,
-        page: parsedOptions.params.page + game.load_more_count,
+        page: (parsedOptions.params.page + game.load_more_count) % 500 + 1,
       }
     }
   }
