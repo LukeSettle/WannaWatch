@@ -17,7 +17,7 @@ const GameScreen = ({ setGame, user }) => {
   const options = (values, totalPages = null) => {
     let page;
 
-    page = Math.floor(Math.random() * 50) + 1;
+    page = Math.floor(Math.random() * 5) + 1;
 
     params = {
       with_origin_country: 'US',

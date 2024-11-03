@@ -19,6 +19,9 @@
     },
     {
       title: "Paramount Plus", code: "531"
+    },
+    {
+      title: "Apple TV", code: "2"
     }
   ]
 
