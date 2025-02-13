@@ -47,12 +47,22 @@ const GameScreen = ({ setGame, user }) => {
   //   return totalPages;
   // };
 
+  const generateShortCode = () => {
+    // Generates a 6-character code from the characters A-Z and 0-9
+    const characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+    let result = "";
+    for (let i = 0; i < 6; i++) {
+      result += characters.charAt(Math.floor(Math.random() * characters.length));
+    }
+    return result;
+  };
+
   const handleSubmit = async (values) => {
     Keyboard.dismiss();
     // const totalPages = await fetchTotalPages(values);
 
     const gameParams = {
-      entry_code: uuidv4(),
+      entry_code: generateShortCode(),
       query: JSON.stringify(options(values)),
       user_id: user.id,
       providers: values.providers
