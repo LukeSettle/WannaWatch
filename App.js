@@ -92,7 +92,7 @@ export default function App() {
   }, [deviceId]);
 
   return (
-    <UserContext.Provider value={{ user, setUser, entryCode, onLayoutRootView }}>
+    <UserContext.Provider value={{ user, setUser, entryCode, setEntryCode, onLayoutRootView }}>
       <NavigationContainer>
         <Stack.Navigator
           initialRouteName={"Home"}

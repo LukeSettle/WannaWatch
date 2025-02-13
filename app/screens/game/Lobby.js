@@ -1,14 +1,14 @@
 import React, { useContext, useState, useEffect } from "react";
+import QRCode from "react-native-qrcode-svg";
+import * as Clipboard from "expo-clipboard";
 import {
-  Modal,
   Pressable,
   FlatList,
   Text,
   View,
   StyleSheet,
+  Modal,
 } from "react-native";
-import QRCode from "react-native-qrcode-svg";
-import * as Clipboard from "expo-clipboard";
 import { UserContext } from "../../contexts/UserContext";
 import { SocketContext } from "../../contexts/SocketContext";
 import globalStyles from "../../../config/styles";
@@ -53,19 +53,20 @@ const Lobby = ({ game, serverMessages }) => {
   useEffect(() => {
     if (!game || !game.players) return;
 
-    const player = game.players.find((player) => player.user.id === user.id);
+    const player = game.players.find((p) => p.user.id === user.id);
     if (player) {
       setGameReady(true);
     }
 
-    // Adjust this to match your deep link scheme
-    setLink(`exp://192.168.86.23:8081?entry_code=${game.entry_code}`);
+    // Update with your custom scheme or local dev URL
+    setLink(`wannawatch://?entry_code=${game.entry_code}`);
+    // setLink(`exp://192.168.86.23:8081?entry_code=${game.entry_code}`);
   }, [game]);
 
   return (
     <View style={styles.container}>
       <Text style={styles.header}>Lobby</Text>
-      <Text style={styles.instructionText}>Scan code to join game</Text>
+      <Text style={styles.instructionText}>Invite your friends to join the fun!</Text>
 
       <View style={styles.qrCodeContainer}>
         {link && (
@@ -73,8 +74,8 @@ const Lobby = ({ game, serverMessages }) => {
             <QRCode value={link} size={150} />
             <Text style={styles.entryCodeText}>Game Code: {game.entry_code}</Text>
             <Text style={styles.instructionsForSharing}>
-              Share this code with your friends so they can join the game. They can
-              scan the QR code or use the copied link.
+              Share this code, let them scan
+              the QR code, or send them the link so they can jump right into the game.
             </Text>
 
             <Pressable
@@ -125,7 +126,7 @@ const Lobby = ({ game, serverMessages }) => {
               <Text style={styles.messageText}>{item}</Text>
             </View>
           )}
-          keyExtractor={(item, index) => `${item}-${index}`}
+          keyExtractor={(item) => item}
         />
       </View>
 
@@ -213,6 +214,7 @@ const styles = StyleSheet.create({
     textAlign: "center",
     color: "#333333",
     paddingHorizontal: 10,
+    fontWeight: "600",
   },
   readyButtonContainer: {
     backgroundColor: "#3498db",
@@ -229,7 +231,6 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
     borderRadius: 6,
     padding: 10,
-    // Optional: subtle border or shadow
     borderWidth: 1,
     borderColor: "#ddd",
   },
