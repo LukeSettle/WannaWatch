@@ -59,8 +59,8 @@ const Lobby = ({ game, serverMessages }) => {
     }
 
     // Update with your custom scheme or local dev URL
-    setLink(`wannawatch://?entry_code=${game.entry_code}`);
-    // setLink(`exp://192.168.86.23:8081?entry_code=${game.entry_code}`);
+    // setLink(`https://apps.apple.com/us/app/wannawatch/id6479348557?entry_code=${game.entry_code}`);
+    setLink(`exp://192.168.86.23:8081?entry_code=${game.entry_code}`);
   }, [game]);
 
   return (

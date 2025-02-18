@@ -1,4 +1,4 @@
-import React, { useContext } from "react";
+import React, { useContext, useState } from "react";
 import { Formik } from "formik";
 import {
   StyleSheet,
@@ -8,6 +8,7 @@ import {
   TextInput,
   Image,
   Alert,
+  Modal,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
@@ -18,46 +19,32 @@ import globalStyles from "../../../config/styles";
 import { UserContext } from "../../contexts/UserContext";
 
 const WelcomeScreen = ({ navigation }) => {
-  const { user, setUser, entryCode, setEntryCode, onLayoutRootView } =
-    useContext(UserContext);
+  const { user, setUser, entryCode, setEntryCode, onLayoutRootView } = useContext(UserContext);
+  const [showEditNameModal, setShowEditNameModal] = useState(false);
 
-  // Called when user enters a new username
-  const submitForm = (values) => {
+  // Show a loading state if user is null
+  if (!user) {
+    return (
+      <View style={styles.loadingContainer}>
+        <Text style={styles.loadingText}>Loading...</Text>
+      </View>
+    );
+  }
+
+  // Called when user submits their name (first time)
+  const handleNameSubmit = (values) => {
     const userParams = {
       device_id: user.device_id,
       username: values.username,
     };
 
     upsertUser(userParams)
-      .then((upsertedUser) => {
-        setUser(upsertedUser);
-        navigation.navigate("Game");
+      .then((updatedUser) => {
+        setUser(updatedUser);
       })
       .catch((error) => {
         console.log("error", error);
         Alert.alert("Error", "Unable to update user.");
-      });
-  };
-
-  // Called when user wants to create a new game
-  const handleCreateGame = () => {
-    // Clear any previously set entry code
-    setEntryCode("");
-
-    // Optionally upsert again if you want to ensure user is synced
-    const userParams = {
-      device_id: user.device_id,
-      username: user.username,
-    };
-
-    upsertUser(userParams)
-      .then((upsertedUser) => {
-        setUser(upsertedUser);
-        navigation.navigate("Game");
-      })
-      .catch((error) => {
-        console.log("error", error);
-        Alert.alert("Error", "Unable to create game.");
       });
   };
 
@@ -67,12 +54,16 @@ const WelcomeScreen = ({ navigation }) => {
       Alert.alert("Invalid Code", "Please enter a valid game code.");
       return;
     }
-    // Simulate deep link or set the entryCode in context
     setEntryCode(code);
     navigation.navigate("Game");
   };
 
-  if (!user) return null;
+  // Called when user wants to create a new game
+  const handleCreateGame = () => {
+    // Clear any previously set entry code
+    setEntryCode("");
+    navigation.navigate("Game");
+  };
 
   const hasUsername = !!user.username;
 
@@ -81,26 +72,23 @@ const WelcomeScreen = ({ navigation }) => {
       colors={[colors.primary, colors.secondary, colors.red]}
       style={styles.background}
     >
-      {/* Center children vertically & horizontally */}
-      <KeyboardAwareScrollView
-        contentContainerStyle={styles.scrollContainer}
-      >
-        <View style={styles.innerContainer} onLayout={onLayoutRootView}>
-          <Image
-            source={require("../../assets/icon.png")}
-            style={styles.image}
-          />
+      {/* Username in the top right */}
+      {hasUsername && (
+        <View style={styles.topRightContainer}>
+          <Pressable onPress={() => setShowEditNameModal(true)}>
+            <Text style={styles.usernameText}>{user.username}</Text>
+          </Pressable>
+        </View>
+      )}
 
-          <Text style={styles.headerText}>
-            So... what do you wanna watch?
-          </Text>
+      <KeyboardAwareScrollView contentContainerStyle={styles.scrollContainer}>
+        <View onLayout={onLayoutRootView} style={styles.innerContainer}>
+          <Image source={require("../../assets/icon.png")} style={styles.image} />
+          <Text style={styles.headerText}>So... what do you wanna watch?</Text>
 
-          {/* If user has NO username, show "Enter your name" flow */}
-          {!hasUsername && (
-            <Formik
-              initialValues={{ username: user.username || "" }}
-              onSubmit={(values) => submitForm(values)}
-            >
+          {!hasUsername ? (
+            // Name Entry Form (if username not set)
+            <Formik initialValues={{ username: "" }} onSubmit={handleNameSubmit}>
               {({ handleChange, handleBlur, handleSubmit, values }) => (
                 <View style={styles.formContainer}>
                   <TextInput
@@ -118,18 +106,14 @@ const WelcomeScreen = ({ navigation }) => {
                     ]}
                     onPress={handleSubmit}
                   >
-                    <Text style={globalStyles.buttonText}>
-                      Start Matching
-                    </Text>
+                    <Text style={globalStyles.buttonText}>Save Name</Text>
                   </Pressable>
                 </View>
               )}
             </Formik>
-          )}
-
-          {/* If user ALREADY has a username, show "Game Code" flow */}
-          {hasUsername && (
-            <Formik initialValues={{ gameCode: "" }} onSubmit={() => {}}>
+          ) : (
+            // Game Code Form (shown once the user has a name)
+            <Formik initialValues={{ gameCode: entryCode }} onSubmit={() => {}}>
               {({ handleChange, handleBlur, values }) => (
                 <View style={styles.formContainer}>
                   <Text style={styles.label}>Enter Game Code</Text>
@@ -153,15 +137,12 @@ const WelcomeScreen = ({ navigation }) => {
                     <Text style={globalStyles.buttonText}>Join Game</Text>
                   </Pressable>
 
-                  {/* Create Game Button - BLUE */}
+                  {/* Create Game Button (blue) */}
                   <Pressable
                     style={({ pressed }) => [
                       globalStyles.buttonContainer,
                       pressed && globalStyles.pressedButtonContainer,
-                      {
-                        marginTop: 10,
-                        backgroundColor: "#3498db", // Overridden color
-                      },
+                      { marginTop: 10, backgroundColor: "#3498db" },
                     ]}
                     onPress={handleCreateGame}
                   >
@@ -185,6 +166,65 @@ const WelcomeScreen = ({ navigation }) => {
           </Pressable>
         </View>
       </KeyboardAwareScrollView>
+
+      {/* Modal for editing name */}
+      <Modal visible={showEditNameModal} transparent animationType="slide">
+        <View style={styles.modalBackground}>
+          <View style={styles.modalContainer}>
+            <Text style={styles.modalTitle}>Edit Name</Text>
+            <Formik
+              initialValues={{ username: user.username || "" }}
+              onSubmit={(values) => {
+                const userParams = {
+                  device_id: user.device_id,
+                  username: values.username,
+                };
+                upsertUser(userParams)
+                  .then((updatedUser) => {
+                    setUser(updatedUser);
+                    setShowEditNameModal(false);
+                  })
+                  .catch((error) => {
+                    console.log("error", error);
+                    Alert.alert("Error", "Unable to update name.");
+                  });
+              }}
+            >
+              {({ handleChange, handleBlur, handleSubmit, values }) => (
+                <View>
+                  <TextInput
+                    style={styles.input}
+                    onChangeText={handleChange("username")}
+                    onBlur={handleBlur("username")}
+                    value={values.username}
+                    placeholder="Enter your name"
+                    placeholderTextColor="#aaa"
+                  />
+                  <Pressable
+                    style={({ pressed }) => [
+                      globalStyles.buttonContainer,
+                      pressed && globalStyles.pressedButtonContainer,
+                    ]}
+                    onPress={handleSubmit}
+                  >
+                    <Text style={globalStyles.buttonText}>Save Name</Text>
+                  </Pressable>
+                  <Pressable
+                    style={({ pressed }) => [
+                      globalStyles.buttonContainer,
+                      pressed && globalStyles.pressedButtonContainer,
+                      styles.cancelButton,
+                    ]}
+                    onPress={() => setShowEditNameModal(false)}
+                  >
+                    <Text style={globalStyles.buttonText}>Cancel</Text>
+                  </Pressable>
+                </View>
+              )}
+            </Formik>
+          </View>
+        </View>
+      </Modal>
     </LinearGradient>
   );
 };
@@ -195,7 +235,6 @@ const styles = StyleSheet.create({
   background: {
     flex: 1,
   },
-  // Ensures content is centered within the scrollable area
   scrollContainer: {
     flexGrow: 1,
     justifyContent: "center",
@@ -203,6 +242,19 @@ const styles = StyleSheet.create({
   },
   innerContainer: {
     alignItems: "center",
+    width: "100%",
+  },
+  topRightContainer: {
+    position: "absolute",
+    top: 40,
+    right: 20,
+    zIndex: 10,
+  },
+  usernameText: {
+    fontSize: 16,
+    color: colors.white,
+    fontWeight: "bold",
+    textDecorationLine: "underline",
   },
   image: {
     width: 100,
@@ -222,7 +274,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#f0f0f0",
     borderRadius: 10,
     padding: 20,
-    marginVertical: 20,
+    margin: 20,
     width: 300,
   },
   label: {
@@ -244,5 +296,40 @@ const styles = StyleSheet.create({
   linkText: {
     color: colors.white,
     fontSize: 18,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#f0f0f0",
+  },
+  loadingText: {
+    fontSize: 18,
+    color: "#333",
+  },
+  modalBackground: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.5)",
+    justifyContent: "center",
+    alignItems: "center",
+    paddingHorizontal: 20,
+  },
+  modalContainer: {
+    backgroundColor: "#fff",
+    padding: 20,
+    borderRadius: 10,
+    width: "100%",
+    maxWidth: 350,
+  },
+  modalTitle: {
+    fontSize: 22,
+    fontWeight: "bold",
+    marginBottom: 10,
+    color: colors.flame,
+    textAlign: "center",
+  },
+  cancelButton: {
+    marginTop: 10,
+    backgroundColor: "#ccc",
   },
 });

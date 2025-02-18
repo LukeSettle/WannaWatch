@@ -2,6 +2,19 @@ import axios from 'axios';
 
 const apiKey = 'fd1efe23da588e99056fdb264ca89bbd';
 
+const fetchProviders = async () => {
+  const url = `https://api.themoviedb.org/3/watch/providers/movie?api_key=${apiKey}`;
+
+  try {
+    const response = await axios.get(url);
+    return response.data.results;
+  }
+  catch (error) {
+    console.error('Fetching providers failed:', error);
+    throw error;
+  }
+};
+
 const fetchMovieDetails = async (movieId) => {
   const urls = [
     `https://api.themoviedb.org/3/movie/${movieId}?api_key=${apiKey}`,
@@ -41,4 +54,4 @@ const fetchGenres = async () => {
   }
 }
 
-export { fetchMovieDetails, fetchGenres };
+export { fetchMovieDetails, fetchGenres, fetchProviders };
