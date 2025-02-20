@@ -13,6 +13,7 @@ import {
 import { LinearGradient } from "expo-linear-gradient";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 
+import CurrentGames from "./CurrentGames";
 import { upsertUser } from "../../data/backend_client";
 import colors from "../../../config/colors";
 import globalStyles from "../../../config/styles";
@@ -28,7 +29,6 @@ const WelcomeScreen = ({ navigation }) => {
     }
   }, [entryCode]);
 
-  // Show a loading state if user is null
   if (!user) {
     return (
       <View style={styles.loadingContainer}>
@@ -37,13 +37,11 @@ const WelcomeScreen = ({ navigation }) => {
     );
   }
 
-  // Called when user submits their name (first time)
   const handleNameSubmit = (values) => {
     const userParams = {
       device_id: user.device_id,
       username: values.username,
     };
-
     upsertUser(userParams)
       .then((updatedUser) => {
         setUser(updatedUser);
@@ -54,7 +52,6 @@ const WelcomeScreen = ({ navigation }) => {
       });
   };
 
-  // Called when user wants to join a game with a code
   const handleJoinGame = (code) => {
     if (!code) {
       Alert.alert("Invalid Code", "Please enter a valid game code.");
@@ -64,9 +61,7 @@ const WelcomeScreen = ({ navigation }) => {
     navigation.navigate("Game");
   };
 
-  // Called when user wants to create a new game
   const handleCreateGame = () => {
-    // Clear any previously set entry code
     setEntryCode("");
     navigation.navigate("Game");
   };
@@ -78,7 +73,7 @@ const WelcomeScreen = ({ navigation }) => {
       colors={[colors.primary, colors.secondary, colors.red]}
       style={styles.background}
     >
-      {/* Username in the top right */}
+      {/* Top-right user name edit */}
       {hasUsername && (
         <View style={styles.topRightContainer}>
           <Pressable onPress={() => setShowEditNameModal(true)}>
@@ -87,13 +82,20 @@ const WelcomeScreen = ({ navigation }) => {
         </View>
       )}
 
-      <KeyboardAwareScrollView contentContainerStyle={styles.scrollContainer}>
+      {/* The main scrollable area */}
+      <KeyboardAwareScrollView
+        contentContainerStyle={styles.scrollContainer}
+        nestedScrollEnabled
+      >
+        {/* The "top" portion (form, etc.) */}
         <View onLayout={onLayoutRootView} style={styles.innerContainer}>
-          <Image source={require("../../assets/icon.png")} style={styles.image} />
+          <Image
+            source={require("../../assets/icon.png")}
+            style={styles.image}
+          />
           <Text style={styles.headerText}>So... what do you wanna watch?</Text>
 
           {!hasUsername ? (
-            // Name Entry Form (if username not set)
             <Formik initialValues={{ username: "" }} onSubmit={handleNameSubmit}>
               {({ handleChange, handleBlur, handleSubmit, values }) => (
                 <View style={styles.formContainer}>
@@ -118,7 +120,6 @@ const WelcomeScreen = ({ navigation }) => {
               )}
             </Formik>
           ) : (
-            // Game Code Form (shown once the user has a name)
             <Formik initialValues={{ gameCode: entryCode }} onSubmit={() => {}}>
               {({ handleChange, handleBlur, values }) => (
                 <View style={styles.formContainer}>
@@ -131,8 +132,6 @@ const WelcomeScreen = ({ navigation }) => {
                     placeholder="e.g. ABC123"
                     placeholderTextColor="#aaa"
                   />
-
-                  {/* Join Game Button */}
                   <Pressable
                     style={({ pressed }) => [
                       globalStyles.buttonContainer,
@@ -142,8 +141,6 @@ const WelcomeScreen = ({ navigation }) => {
                   >
                     <Text style={globalStyles.buttonText}>Join Game</Text>
                   </Pressable>
-
-                  {/* Create Game Button (blue) */}
                   <Pressable
                     style={({ pressed }) => [
                       globalStyles.buttonContainer,
@@ -159,7 +156,6 @@ const WelcomeScreen = ({ navigation }) => {
             </Formik>
           )}
 
-          {/* View Matches Button (always visible) */}
           <Pressable
             style={({ pressed }) => [
               globalStyles.buttonContainer,
@@ -170,6 +166,12 @@ const WelcomeScreen = ({ navigation }) => {
           >
             <Text style={styles.linkText}>View Matches</Text>
           </Pressable>
+        </View>
+
+        {/* The "Current Games" section, also scrollable if needed. */}
+        <View style={styles.currentGamesSection}>
+          {/* Pass the navigation so CurrentGames can navigate if needed */}
+          <CurrentGames navigation={navigation} />
         </View>
       </KeyboardAwareScrollView>
 
@@ -245,6 +247,8 @@ const styles = StyleSheet.create({
     flexGrow: 1,
     justifyContent: "center",
     alignItems: "center",
+    paddingTop: 80, // some extra space at the top
+    paddingBottom: 30, // some extra space at the bottom
   },
   innerContainer: {
     alignItems: "center",
@@ -338,4 +342,10 @@ const styles = StyleSheet.create({
     marginTop: 10,
     backgroundColor: "#ccc",
   },
+  // CurrentGames styling
+  currentGamesSection: {
+    width: "100%",
+    alignItems: "center",
+    marginTop: 20,
+  }
 });

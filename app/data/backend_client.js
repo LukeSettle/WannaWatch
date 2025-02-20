@@ -1,8 +1,8 @@
 // const BASE_URL = 'http://localhost:3000'
 const BASE_URL = 'https://wanna-watch-rails.onrender.com'
 
-function gamesIndex(params) {
-  const url = `${BASE_URL}/games?user_id=${params.user_id}`;
+function gamesIndex(user_id) {
+  const url = `${BASE_URL}/games?user_id=${user_id}`;
 
   const fetchOptions = {
     method: 'GET',
