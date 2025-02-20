@@ -1,4 +1,4 @@
-import React, { useContext, useState } from "react";
+import React, { useEffect, useContext, useState } from "react";
 import { Formik } from "formik";
 import {
   StyleSheet,
@@ -21,6 +21,12 @@ import { UserContext } from "../../contexts/UserContext";
 const WelcomeScreen = ({ navigation }) => {
   const { user, setUser, entryCode, setEntryCode, onLayoutRootView } = useContext(UserContext);
   const [showEditNameModal, setShowEditNameModal] = useState(false);
+
+  useEffect(() => {
+    if (entryCode) {
+      navigation.navigate("Game");
+    }
+  }, [entryCode]);
 
   // Show a loading state if user is null
   if (!user) {

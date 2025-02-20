@@ -8,6 +8,7 @@ import {
   View,
   StyleSheet,
   Modal,
+  ScrollView,
 } from "react-native";
 import { UserContext } from "../../contexts/UserContext";
 import { SocketContext } from "../../contexts/SocketContext";
@@ -59,126 +60,135 @@ const Lobby = ({ game, serverMessages }) => {
     }
 
     // Update with your custom scheme or local dev URL
-    // setLink(`https://apps.apple.com/us/app/wannawatch/id6479348557?entry_code=${game.entry_code}`);
-    setLink(`exp://192.168.86.23:8081?entry_code=${game.entry_code}`);
+    setLink(`https://apps.apple.com/us/app/wannawatch/id6479348557?entry_code=${game.entry_code}`);
+    // setLink(`exp://192.168.86.23:8081?entry_code=${game.entry_code}`);
   }, [game]);
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.header}>Lobby</Text>
-      <Text style={styles.instructionText}>Invite your friends to join the fun!</Text>
+    <ScrollView contentContainerStyle={styles.scrollContainer}>
+      <View style={styles.container}>
+        <Text style={styles.header}>Lobby</Text>
+        <Text style={styles.instructionText}>
+          Invite your friends to join the fun!
+        </Text>
 
-      <View style={styles.qrCodeContainer}>
-        {link && (
-          <>
-            <QRCode value={link} size={150} />
-            <Text style={styles.entryCodeText}>Game Code: {game.entry_code}</Text>
-            <Text style={styles.instructionsForSharing}>
-              Share this code, let them scan
-              the QR code, or send them the link so they can jump right into the game.
-            </Text>
+        <View style={styles.qrCodeContainer}>
+          {link && (
+            <>
+              <QRCode value={link} size={150} />
+              <Text style={styles.entryCodeText}>
+                Game Code: {game.entry_code}
+              </Text>
+              <Text style={styles.instructionsForSharing}>
+                Share this code, let them scan the QR code, or send them the link
+                so they can jump right into the game.
+              </Text>
 
-            <Pressable
-              style={[globalStyles.buttonContainer, { marginTop: 10 }]}
-              onPress={copyToClipboard}
-            >
-              <Text style={globalStyles.buttonText}>Copy Link</Text>
-            </Pressable>
-          </>
-        )}
-      </View>
-
-      {/* READY BUTTON */}
-      <Pressable
-        style={({ pressed }) => [
-          globalStyles.buttonContainer,
-          styles.readyButtonContainer,
-          (!gameReady || userReady) && globalStyles.disabledButtonContainer,
-          pressed && globalStyles.pressedButtonContainer,
-        ]}
-        onPress={handleReadyPress}
-        disabled={!gameReady || userReady}
-      >
-        <Text style={globalStyles.buttonText}>Ready</Text>
-      </Pressable>
-
-      {/* Players List */}
-      <Text style={styles.subHeader}>Current Players</Text>
-      <View style={styles.playersContainer}>
-        <FlatList
-          data={game.players}
-          renderItem={({ item }) => (
-            <View style={styles.playerItem}>
-              <Text style={styles.playerText}>{item.user?.username}</Text>
-            </View>
-          )}
-          keyExtractor={(item) => item.id}
-        />
-      </View>
-
-      {/* Messages List */}
-      <Text style={styles.subHeader}>Game Updates</Text>
-      <View style={styles.updatesContainer}>
-        <FlatList
-          data={serverMessages}
-          renderItem={({ item }) => (
-            <View style={styles.messageContainer}>
-              <Text style={styles.messageText}>{item}</Text>
-            </View>
-          )}
-          keyExtractor={(item) => item}
-        />
-      </View>
-
-      {/* Custom Modal Alert */}
-      <Modal visible={showInviteAlert} transparent animationType="fade">
-        <View style={styles.modalBackground}>
-          <View style={styles.modalContainer}>
-            <Text style={styles.modalTitle}>Heads Up!</Text>
-            <Text style={styles.modalMessage}>
-              It looks like you're the only one here. Browsing movies solo can be
-              fun, but it's even better with friends! Share your game link, let
-              someone scan the QR code, or pass along the game code so your buddies
-              can join. Would you like to continue alone?
-            </Text>
-            <View style={styles.modalButtonContainer}>
               <Pressable
-                style={[
-                  globalStyles.buttonContainer,
-                  styles.modalButton,
-                  styles.inviteButton,
-                ]}
-                onPress={() => setShowInviteAlert(false)}
+                style={[globalStyles.buttonContainer, { marginTop: 10 }]}
+                onPress={copyToClipboard}
               >
-                <Text style={globalStyles.buttonText}>Invite Friends</Text>
+                <Text style={globalStyles.buttonText}>Copy Link</Text>
               </Pressable>
-              <Pressable
-                style={[
-                  globalStyles.buttonContainer,
-                  styles.modalButton,
-                  styles.continueButton,
-                ]}
-                onPress={() => {
-                  setShowInviteAlert(false);
-                  sendReadyMessage();
-                }}
-              >
-                <Text style={globalStyles.buttonText}>Continue Solo</Text>
-              </Pressable>
+            </>
+          )}
+        </View>
+
+        {/* READY BUTTON */}
+        <Pressable
+          style={({ pressed }) => [
+            globalStyles.buttonContainer,
+            styles.readyButtonContainer,
+            (!gameReady || userReady) && globalStyles.disabledButtonContainer,
+            pressed && globalStyles.pressedButtonContainer,
+          ]}
+          onPress={handleReadyPress}
+          disabled={!gameReady || userReady}
+        >
+          <Text style={globalStyles.buttonText}>Ready</Text>
+        </Pressable>
+
+        {/* Players List */}
+        <Text style={styles.subHeader}>Current Players</Text>
+        <View style={styles.playersContainer}>
+          <FlatList
+            data={game.players}
+            renderItem={({ item }) => (
+              <View style={styles.playerItem}>
+                <Text style={styles.playerText}>{item.user?.username}</Text>
+              </View>
+            )}
+            keyExtractor={(item) => item.id}
+          />
+        </View>
+
+        {/* Messages List */}
+        <Text style={styles.subHeader}>Game Updates</Text>
+        <View style={styles.updatesContainer}>
+          <FlatList
+            data={[...serverMessages].reverse()}
+            renderItem={({ item }) => (
+              <View style={styles.messageContainer}>
+                <Text style={styles.messageText}>{item}</Text>
+              </View>
+            )}
+            keyExtractor={(item, index) => index.toString()}
+          />
+        </View>
+
+        {/* Custom Modal Alert */}
+        <Modal visible={showInviteAlert} transparent animationType="fade">
+          <View style={styles.modalBackground}>
+            <View style={styles.modalContainer}>
+              <Text style={styles.modalTitle}>Heads Up!</Text>
+              <Text style={styles.modalMessage}>
+                It looks like you're the only one here. Browsing movies solo can be
+                fun, but it's even better with friends! Share your game link, let
+                someone scan the QR code, or pass along the game code so your buddies
+                can join. Would you like to continue alone?
+              </Text>
+              <View style={styles.modalButtonContainer}>
+                <Pressable
+                  style={[
+                    globalStyles.buttonContainer,
+                    styles.modalButton,
+                    styles.inviteButton,
+                  ]}
+                  onPress={() => setShowInviteAlert(false)}
+                >
+                  <Text style={globalStyles.buttonText}>Invite Friends</Text>
+                </Pressable>
+                <Pressable
+                  style={[
+                    globalStyles.buttonContainer,
+                    styles.modalButton,
+                    styles.continueButton,
+                  ]}
+                  onPress={() => {
+                    setShowInviteAlert(false);
+                    sendReadyMessage();
+                  }}
+                >
+                  <Text style={globalStyles.buttonText}>Continue Solo</Text>
+                </Pressable>
+              </View>
             </View>
           </View>
-        </View>
-      </Modal>
-    </View>
+        </Modal>
+      </View>
+    </ScrollView>
   );
 };
 
 export default Lobby;
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
+  scrollContainer: {
+    flexGrow: 1,
     padding: 20,
+    backgroundColor: "#f0f0f0",
+  },
+  container: {
     backgroundColor: "#f0f0f0",
   },
   header: {
