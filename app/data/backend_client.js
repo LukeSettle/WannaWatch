@@ -1,6 +1,29 @@
 // const BASE_URL = 'http://localhost:3000'
 const BASE_URL = 'https://wanna-watch-rails.onrender.com'
 
+function gamesIndex(params) {
+  const url = `${BASE_URL}/games?user_id=${params.user_id}`;
+
+  const fetchOptions = {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  };
+
+  return fetch(url, fetchOptions)
+    .then(response => {
+      return response.json();
+    })
+    .then(data => {
+      return data;
+    })
+    .catch(error => {
+      console.error('Error getting games:', error);
+      throw error;
+    });
+}
+
 function upsertUser(user) {
   const url = `${BASE_URL}/users/upsert`;
 
@@ -180,6 +203,7 @@ function friendsMovieIds(params) {
 
 module.exports = {
   upsertUser,
+  gamesIndex,
   upsertGame,
   findGameFromEntryCode,
   keepPlaying,

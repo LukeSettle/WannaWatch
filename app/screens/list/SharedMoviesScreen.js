@@ -27,15 +27,17 @@ const SharedMoviesScreen = ({ route }) => {
 
   return (
     <View>
-      <Picker
-        selectedValue={listKey}
-        onValueChange={(itemValue, itemIndex) =>
-          setListKey(itemValue)
-        }>
-        <Picker.Item label="Our Matches" value="ourLikedMovieIds" />
-        <Picker.Item label="Friends Liked Movies" value="friendsLikedMovieIds" />
-        <Picker.Item label="My Liked Movies" value="myLikedMovieIds" />
-      </Picker>
+      {user.id !== friendId && (
+        <Picker
+          selectedValue={listKey}
+          onValueChange={(itemValue, itemIndex) =>
+            setListKey(itemValue)
+          }>
+          <Picker.Item label="Our Matches" value="ourLikedMovieIds" />
+          <Picker.Item label="Friends Liked Movies" value="friendsLikedMovieIds" />
+          <Picker.Item label="My Liked Movies" value="myLikedMovieIds" />
+        </Picker>
+      )}
       {/* <Text style={{ fontSize: 22, fontWeight: 'bold', padding: 20 }}>Shared Movies:</Text> */}
       <ScrollView contentContainerStyle={styles.contentContainer}>
         {movieIds[listKey].map((movieId) => (
