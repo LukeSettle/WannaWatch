@@ -1,5 +1,15 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, Image, Pressable, StyleSheet, LayoutAnimation, Platform, UIManager } from "react-native";
+import {
+  View,
+  Text,
+  Image,
+  Pressable,
+  StyleSheet,
+  LayoutAnimation,
+  Platform,
+  UIManager
+} from "react-native";
+import Ionicons from "react-native-vector-icons/Ionicons";
 import justwatch_logo from "../../assets/justwatch_logo.png";
 import PROVIDERS from "../../../config/providers";
 import { fetchMovieDetails } from "../../data/movie_api";
@@ -22,7 +32,7 @@ function MovieDetails({ movie, autoFetch = false }) {
     if (movie.overview.length > maxLength) {
       return `${movie.overview.substring(0, maxLength)}...`;
     }
-    return overview;
+    return movie.overview;
   };
 
   const fetchDetails = () => {
@@ -41,40 +51,44 @@ function MovieDetails({ movie, autoFetch = false }) {
       .catch((error) => {
         console.log(error);
       });
-  }
+  };
 
   const providerLogos = () => {
     return (
       Object.entries(movieDetails.watchProviders.results.US).map(([key, providers]) => {
-        if (key === 'link') return;
+        if (key === "link") return null;
 
-        return (
-          providers.map((provider) => {
-            if (PROVIDERS.find((p) => p.code === String(provider.provider_id)) === undefined) return;
+        return providers.map((provider) => {
+          if (
+            PROVIDERS.find((p) => p.code === String(provider.provider_id)) ===
+            undefined
+          )
+            return null;
 
-            return (
-              <Image
-                key={provider.provider_id}
-                source={{uri: `https://image.tmdb.org/t/p/w500/${provider.logo_path}`}}
-                style={{width: 30, height: 30}}
-              />
-            )
-          })
-        )
+          return (
+            <Image
+              key={provider.provider_id}
+              source={{
+                uri: `https://image.tmdb.org/t/p/w500/${provider.logo_path}`,
+              }}
+              style={{ width: 30, height: 30 }}
+            />
+          );
+        });
       })
-    )
+    );
   };
 
   function toPrettyDate(dateString) {
-    const options = { year: 'numeric', month: 'long', day: 'numeric' };
+    const options = { year: "numeric", month: "long", day: "numeric" };
     const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', options);
+    return date.toLocaleDateString("en-US", options);
   }
 
   const innerDetails = () => {
-    console.log('movieDetails', movieDetails);
-   return movieDetails.movieDetails
-  }
+    console.log("movieDetails", movieDetails);
+    return movieDetails.movieDetails;
+  };
 
   useEffect(() => {
     if (autoFetch) {
@@ -88,21 +102,46 @@ function MovieDetails({ movie, autoFetch = false }) {
   return (
     <View style={styles.container}>
       <Pressable onPress={fetchDetails}>
-        <View style={showFullDetails ? styles.overviewContainerExpanded : styles.overviewContainer}>
+        <View
+          style={
+            showFullDetails
+              ? styles.overviewContainerExpanded
+              : styles.overviewContainer
+          }
+        >
           <Text style={styles.overview}>{truncateOverview()}</Text>
+          {!showFullDetails && (
+            <Ionicons
+              name="chevron-down-outline"
+              size={20}
+              color="#333"
+              style={styles.expandIcon}
+            />
+          )}
         </View>
       </Pressable>
       {showFullDetails && (
         <>
-          <Text style={styles.details}>Genres: {innerDetails().genres.map((genre) => genre.name).join(', ')}</Text>
-          <Text style={styles.details}>release date: {toPrettyDate(innerDetails().release_date)}</Text>
-          <Text style={styles.details}>runtime: {innerDetails().runtime} minutes</Text>
-          <Text style={styles.details}>vote average: {innerDetails().vote_average}</Text>
+          <Text style={styles.details}>
+            Genres:{" "}
+            {innerDetails().genres.map((genre) => genre.name).join(", ")}
+          </Text>
+          <Text style={styles.details}>
+            Release date: {toPrettyDate(innerDetails().release_date)}
+          </Text>
+          <Text style={styles.details}>
+            Runtime: {innerDetails().runtime} minutes
+          </Text>
+          <Text style={styles.details}>
+            Vote average: {innerDetails().vote_average}
+          </Text>
           <Text>Available On</Text>
-          <View style={styles.providerLogos}>
-            {providerLogos()}
-          </View>
-          <Image source={justwatch_logo} style={styles.justWatchLogo} resizeMode='contain' />
+          <View style={styles.providerLogos}>{providerLogos()}</View>
+          <Image
+            source={justwatch_logo}
+            style={styles.justWatchLogo}
+            resizeMode="contain"
+          />
         </>
       )}
     </View>
@@ -112,24 +151,31 @@ function MovieDetails({ movie, autoFetch = false }) {
 const styles = StyleSheet.create({
   container: {
     padding: 20,
-    backgroundColor: '#fff', // or any color that matches your theme
+    backgroundColor: "#fff",
   },
   overviewContainer: {
     borderWidth: 1,
-    borderColor: '#dcdcdc',
+    borderColor: "#dcdcdc",
     padding: 10,
     borderRadius: 4,
+    position: "relative", // enable absolute positioning for the icon
   },
   overviewContainerExpanded: {
     borderWidth: 1,
-    borderColor: '#dcdcdc',
+    borderColor: "#dcdcdc",
     padding: 10,
     borderRadius: 4,
     marginBottom: 10,
+    position: "relative",
   },
   overview: {
     fontSize: 16,
     lineHeight: 24,
+  },
+  expandIcon: {
+    position: "absolute",
+    right: 10,
+    bottom: 10,
   },
   details: {
     fontSize: 14,
@@ -137,19 +183,19 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontSize: 18,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     marginTop: 20,
     marginBottom: 10,
   },
   providerLogos: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
+    flexDirection: "row",
+    flexWrap: "wrap",
     marginBottom: 20,
   },
   providerLogo: {
     width: 50,
     height: 50,
-    resizeMode: 'contain',
+    resizeMode: "contain",
     margin: 5,
   },
   poweredByText: {
@@ -157,9 +203,9 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   justWatchLogo: {
-    width: 100, // Adjust the size to fit your layout
-    height: 50, // Adjust the size to fit your layout
-    alignSelf: 'center', // Center the logo
+    width: 100,
+    height: 50,
+    alignSelf: "center",
   },
 });
 

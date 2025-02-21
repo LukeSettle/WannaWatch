@@ -101,6 +101,32 @@ function upsertGame(game) {
   return retryFetch(url, fetchOptions, 3);
 }
 
+function finishGame(game_id) {
+  const url = `${BASE_URL}/games/${game_id}/finish`;
+
+  const fetchOptions = {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  };
+
+  return fetch(url, fetchOptions)
+    .then(response => {
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
+      }
+      return response.json();
+    })
+    .then(data => {
+      return data;
+    })
+    .catch(error => {
+      console.error('Error finishing game:', error);
+      throw error;
+    });
+}
+
 function findGameFromEntryCode(entryCode) {
   const url = `${BASE_URL}/games/find_by_entry_code?entry_code=${encodeURIComponent(entryCode)}`;
 
@@ -205,6 +231,7 @@ module.exports = {
   upsertUser,
   gamesIndex,
   upsertGame,
+  finishGame,
   findGameFromEntryCode,
   keepPlaying,
   friendsIndex,

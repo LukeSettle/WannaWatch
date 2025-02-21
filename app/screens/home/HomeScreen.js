@@ -24,10 +24,10 @@ const WelcomeScreen = ({ navigation }) => {
   const [showEditNameModal, setShowEditNameModal] = useState(false);
 
   useEffect(() => {
-    if (entryCode) {
+    if (user && entryCode) {
       navigation.navigate("Game");
     }
-  }, [entryCode]);
+  }, [entryCode, user]);
 
   if (!user) {
     return (

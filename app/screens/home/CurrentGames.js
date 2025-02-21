@@ -1,7 +1,8 @@
 import React, { useEffect, useState, useContext } from "react";
-import { View, Text, StyleSheet, TouchableOpacity, FlatList } from "react-native";
-import { gamesIndex } from "../../data/backend_client";
+import { View, Text, StyleSheet, TouchableOpacity, FlatList, Alert } from "react-native";
+import { gamesIndex, finishGame } from "../../data/backend_client"; // ensure deleteGame exists here
 import { UserContext } from "../../contexts/UserContext";
+import Ionicons from "react-native-vector-icons/Ionicons";
 
 const CurrentGames = ({ navigation }) => {
   const { user, setEntryCode } = useContext(UserContext);
@@ -27,9 +28,36 @@ const CurrentGames = ({ navigation }) => {
     navigation.navigate("Game");
   };
 
+  const handleDeleteGame = (game) => {
+    Alert.alert(
+      "Confirm Deletion",
+      "Are you sure you want to delete this game?",
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Delete",
+          style: "destructive",
+          onPress: async () => {
+            try {
+              await finishGame(game.id);
+              setGames((prevGames) => prevGames.filter((g) => g.id !== game.id));
+            } catch (error) {
+              console.error("Error deleting game:", error);
+            }
+          }
+        },
+      ]
+    );
+  };
+
   const renderItem = ({ item }) => (
     <TouchableOpacity style={styles.gameCard} onPress={() => handleGamePress(item)}>
-      <Text style={styles.gameTitle}>Game ID: {item.id}</Text>
+      <View style={styles.gameHeader}>
+        <Text style={styles.gameTitle}>Game ID: {item.id}</Text>
+        <TouchableOpacity onPress={() => handleDeleteGame(item)}>
+          <Ionicons name="trash-outline" size={24} color="red" />
+        </TouchableOpacity>
+      </View>
       <Text style={styles.gameSubtitle}>Entry Code: {item.entry_code}</Text>
       <Text style={styles.playersHeader}>Players:</Text>
       {item.players.map((player) => (
@@ -41,9 +69,7 @@ const CurrentGames = ({ navigation }) => {
   );
 
   if (games.length === 0) {
-    return (
-      null
-    );
+    return null;
   }
 
   return (
@@ -82,11 +108,16 @@ const styles = StyleSheet.create({
     shadowRadius: 3,
     elevation: 3,
   },
+  gameHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 5,
+  },
   gameTitle: {
     fontSize: 20,
     fontWeight: "600",
     color: "#333",
-    marginBottom: 5,
   },
   gameSubtitle: {
     fontSize: 16,
