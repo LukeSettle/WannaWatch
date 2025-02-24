@@ -13,14 +13,16 @@ import {
 import { UserContext } from "../../contexts/UserContext";
 import { SocketContext } from "../../contexts/SocketContext";
 import globalStyles from "../../../config/styles";
+import FriendList from "./FriendList";
 
-const Lobby = ({ game, serverMessages }) => {
+const Lobby = ({ game, setGame, serverMessages }) => {
   const { user } = useContext(UserContext);
   const { webSocket } = useContext(SocketContext);
   const [gameReady, setGameReady] = useState(false);
   const [userReady, setUserReady] = useState(false);
   const [link, setLink] = useState("");
   const [showInviteAlert, setShowInviteAlert] = useState(false);
+  const [showFriendList, setShowFriendList] = useState(false);
 
   // Send "ready" message to the server
   const sendReadyMessage = () => {
@@ -108,6 +110,14 @@ const Lobby = ({ game, serverMessages }) => {
           <Text style={globalStyles.buttonText}>Ready</Text>
         </Pressable>
 
+        {/* Invite Friends Button */}
+        <Pressable
+          style={[globalStyles.buttonContainer, styles.inviteButtonContainer]}
+          onPress={() => setShowFriendList(true)}
+        >
+          <Text style={globalStyles.buttonText}>Add Friends</Text>
+        </Pressable>
+
         {/* Players List */}
         <Text style={styles.subHeader}>Current Players</Text>
         <View style={styles.playersContainer}>
@@ -137,7 +147,7 @@ const Lobby = ({ game, serverMessages }) => {
         </View>
 
         {/* Custom Modal Alert */}
-        <Modal visible={showInviteAlert} transparent animationType="fade">
+        <Modal visible={showInviteAlert} transparent animationType="slide">
           <View style={styles.modalBackground}>
             <View style={styles.modalContainer}>
               <Text style={styles.modalTitle}>Heads Up!</Text>
@@ -172,6 +182,21 @@ const Lobby = ({ game, serverMessages }) => {
                   <Text style={globalStyles.buttonText}>Continue Solo</Text>
                 </Pressable>
               </View>
+            </View>
+          </View>
+        </Modal>
+
+        {/* Friend List Modal */}
+        <Modal visible={showFriendList} transparent animationType="slide">
+          <View style={styles.modalBackground}>
+            <View style={styles.modalContainer}>
+              <FriendList game={game} setGame={setGame} />
+              <Pressable
+                style={[globalStyles.buttonContainer, styles.closeButton]}
+                onPress={() => setShowFriendList(false)}
+              >
+                <Text style={globalStyles.buttonText}>Close</Text>
+              </Pressable>
             </View>
           </View>
         </Modal>
@@ -230,6 +255,10 @@ const styles = StyleSheet.create({
     backgroundColor: "#3498db",
     marginTop: 30,
   },
+  inviteButtonContainer: {
+    backgroundColor: "#e74c3c",
+    marginTop: 10,
+  },
   subHeader: {
     fontSize: 20,
     marginBottom: 10,
@@ -273,14 +302,13 @@ const styles = StyleSheet.create({
   modalBackground: {
     flex: 1,
     backgroundColor: "rgba(0,0,0,0.5)",
-    justifyContent: "center",
-    alignItems: "center",
+    justifyContent: "flex-end",
   },
   modalContainer: {
     backgroundColor: "#fff",
     padding: 20,
-    marginHorizontal: 20,
-    borderRadius: 10,
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
     elevation: 5,
   },
   modalTitle: {
@@ -310,5 +338,9 @@ const styles = StyleSheet.create({
   },
   continueButton: {
     backgroundColor: "#3498db",
+  },
+  closeButton: {
+    backgroundColor: "#e74c3c",
+    marginTop: 10,
   },
 });

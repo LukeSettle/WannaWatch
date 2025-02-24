@@ -1,5 +1,5 @@
-// const BASE_URL = 'http://localhost:3000'
-const BASE_URL = 'https://wanna-watch-rails.onrender.com'
+const BASE_URL = 'http://localhost:3000'
+// const BASE_URL = 'https://wanna-watch-rails.onrender.com'
 
 function gamesIndex(user_id) {
   const url = `${BASE_URL}/games?user_id=${user_id}`;
@@ -78,6 +78,9 @@ function upsertGame(game) {
   const retryFetch = (url, fetchOptions, retries) => {
     return fetch(url, fetchOptions)
       .then(response => {
+        console.log('====================================');
+        console.log('response', response);
+        console.log('====================================');
         if (!response.ok) {
           throw new Error('Network response was not ok');
         }
