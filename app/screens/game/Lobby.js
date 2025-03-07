@@ -18,11 +18,10 @@ import FriendList from "./FriendList";
 const Lobby = ({ game, setGame, serverMessages }) => {
   const { user } = useContext(UserContext);
   const { webSocket } = useContext(SocketContext);
-  const [gameReady, setGameReady] = useState(false);
   const [userReady, setUserReady] = useState(false);
   const [link, setLink] = useState("");
+  const [showFriendsModal, setShowFriendsModal] = useState(false);
   const [showInviteAlert, setShowInviteAlert] = useState(false);
-  const [showFriendList, setShowFriendList] = useState(false);
 
   // Send "ready" message to the server
   const sendReadyMessage = () => {
@@ -39,7 +38,7 @@ const Lobby = ({ game, setGame, serverMessages }) => {
     );
   };
 
-  // Handle ready press; if alone, show modal alert
+  // When the user taps Ready, if they're alone, show an alert modal.
   const handleReadyPress = () => {
     if (game?.players?.length === 1) {
       setShowInviteAlert(true);
@@ -55,70 +54,42 @@ const Lobby = ({ game, setGame, serverMessages }) => {
 
   useEffect(() => {
     if (!game || !game.players) return;
-
-    const player = game.players.find((p) => p.user.id === user.id);
-    if (player) {
-      setGameReady(true);
-    }
-
-    // Update with your custom scheme or local dev URL
-    setLink(`https://apps.apple.com/us/app/wannawatch/id6479348557?entry_code=${game.entry_code}`);
-    // setLink(`exp://192.168.86.23:8081?entry_code=${game.entry_code}`);
+    // Update link with your custom scheme or URL
+    setLink(
+      `https://apps.apple.com/us/app/wannawatch/id6479348557?entry_code=${game.entry_code}`
+    );
   }, [game]);
 
   return (
-    <ScrollView contentContainerStyle={styles.scrollContainer}>
+    <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContainer}>
+      {/* Main Content */}
       <View style={styles.container}>
         <Text style={styles.header}>Lobby</Text>
-        <Text style={styles.instructionText}>
-          Invite your friends to join the fun!
-        </Text>
 
-        <View style={styles.qrCodeContainer}>
-          {link && (
-            <>
-              <QRCode value={link} size={150} />
-              <Text style={styles.entryCodeText}>
-                Game Code: {game.entry_code}
-              </Text>
-              <Text style={styles.instructionsForSharing}>
-                Share this code, let them scan the QR code, or send them the link
-                so they can jump right into the game.
-              </Text>
+        {/* Buttons Section */}
+        <View style={styles.buttonSection}>
+          <Pressable
+            style={({ pressed }) => [
+              globalStyles.buttonContainer,
+              styles.readyButtonContainer,
+              userReady && globalStyles.disabledButtonContainer,
+              pressed && globalStyles.pressedButtonContainer,
+            ]}
+            onPress={handleReadyPress}
+            disabled={userReady}
+          >
+            <Text style={globalStyles.buttonText}>Ready</Text>
+          </Pressable>
 
-              <Pressable
-                style={[globalStyles.buttonContainer, { marginTop: 10 }]}
-                onPress={copyToClipboard}
-              >
-                <Text style={globalStyles.buttonText}>Copy Link</Text>
-              </Pressable>
-            </>
-          )}
+          <Pressable
+            style={[globalStyles.buttonContainer, styles.inviteButtonContainer]}
+            onPress={() => setShowFriendsModal(true)}
+          >
+            <Text style={globalStyles.buttonText}>Add Friends</Text>
+          </Pressable>
         </View>
 
-        {/* READY BUTTON */}
-        <Pressable
-          style={({ pressed }) => [
-            globalStyles.buttonContainer,
-            styles.readyButtonContainer,
-            (!gameReady || userReady) && globalStyles.disabledButtonContainer,
-            pressed && globalStyles.pressedButtonContainer,
-          ]}
-          onPress={handleReadyPress}
-          disabled={!gameReady || userReady}
-        >
-          <Text style={globalStyles.buttonText}>Ready</Text>
-        </Pressable>
-
-        {/* Invite Friends Button */}
-        <Pressable
-          style={[globalStyles.buttonContainer, styles.inviteButtonContainer]}
-          onPress={() => setShowFriendList(true)}
-        >
-          <Text style={globalStyles.buttonText}>Add Friends</Text>
-        </Pressable>
-
-        {/* Players List */}
+        {/* Current Players */}
         <Text style={styles.subHeader}>Current Players</Text>
         <View style={styles.playersContainer}>
           <FlatList
@@ -132,7 +103,7 @@ const Lobby = ({ game, setGame, serverMessages }) => {
           />
         </View>
 
-        {/* Messages List */}
+        {/* Game Updates */}
         <Text style={styles.subHeader}>Game Updates</Text>
         <View style={styles.updatesContainer}>
           <FlatList
@@ -145,62 +116,81 @@ const Lobby = ({ game, setGame, serverMessages }) => {
             keyExtractor={(item, index) => index.toString()}
           />
         </View>
+      </View>
 
-        {/* Custom Modal Alert */}
-        <Modal visible={showInviteAlert} transparent animationType="slide">
-          <View style={styles.modalBackground}>
-            <View style={styles.modalContainer}>
-              <Text style={styles.modalTitle}>Heads Up!</Text>
-              <Text style={styles.modalMessage}>
-                It looks like you're the only one here. Browsing movies solo can be
-                fun, but it's even better with friends! Share your game link, let
-                someone scan the QR code, or pass along the game code so your buddies
-                can join. Would you like to continue alone?
-              </Text>
-              <View style={styles.modalButtonContainer}>
-                <Pressable
-                  style={[
-                    globalStyles.buttonContainer,
-                    styles.modalButton,
-                    styles.inviteButton,
-                  ]}
-                  onPress={() => setShowInviteAlert(false)}
-                >
-                  <Text style={globalStyles.buttonText}>Invite Friends</Text>
-                </Pressable>
-                <Pressable
-                  style={[
-                    globalStyles.buttonContainer,
-                    styles.modalButton,
-                    styles.continueButton,
-                  ]}
-                  onPress={() => {
-                    setShowInviteAlert(false);
-                    sendReadyMessage();
-                  }}
-                >
-                  <Text style={globalStyles.buttonText}>Continue Solo</Text>
-                </Pressable>
-              </View>
-            </View>
-          </View>
-        </Modal>
-
-        {/* Friend List Modal */}
-        <Modal visible={showFriendList} transparent animationType="slide">
-          <View style={styles.modalBackground}>
-            <View style={styles.modalContainer}>
-              <FriendList game={game} setGame={setGame} />
+      {/* Modal for "You're the only one here" Alert */}
+      <Modal visible={showInviteAlert} transparent animationType="slide">
+        <View style={styles.modalBackground}>
+          <View style={styles.modalContainer}>
+            <Text style={styles.modalTitle}>Heads Up!</Text>
+            <Text style={styles.modalMessage}>
+              It looks like you're the only one here. Browsing movies solo can be fun,
+              but it's even better with friends! Share your game link, let someone scan
+              the QR code, or pass along the game code so your buddies can join. Would you
+              like to continue alone?
+            </Text>
+            <View style={styles.modalButtonContainer}>
               <Pressable
-                style={[globalStyles.buttonContainer, styles.closeButton]}
-                onPress={() => setShowFriendList(false)}
+                style={[
+                  globalStyles.buttonContainer,
+                  styles.modalButton,
+                  styles.inviteButton,
+                ]}
+                onPress={() => {
+                  setShowInviteAlert(false);
+                  setShowFriendsModal(true);
+                }}
               >
-                <Text style={globalStyles.buttonText}>Close</Text>
+                <Text style={globalStyles.buttonText}>Invite Friends</Text>
+              </Pressable>
+              <Pressable
+                style={[
+                  globalStyles.buttonContainer,
+                  styles.modalButton,
+                  styles.continueButton,
+                ]}
+                onPress={() => {
+                  setShowInviteAlert(false);
+                  sendReadyMessage();
+                }}
+              >
+                <Text style={globalStyles.buttonText}>Continue Solo</Text>
               </Pressable>
             </View>
           </View>
-        </Modal>
-      </View>
+        </View>
+      </Modal>
+
+      {/* Slide-Up Modal for Friends & Invite Details */}
+      <Modal visible={showFriendsModal} transparent animationType="slide">
+        <Pressable style={styles.modalBackground} onPress={() => setShowFriendsModal(false)}>
+          <Pressable style={styles.modalContainer} onPress={(e) => e.stopPropagation()}>
+            <View style={styles.modalHeaderContainer}>
+              <Text style={styles.modalHeader}>Add Friends</Text>
+              <Pressable style={styles.closeButton} onPress={() => setShowFriendsModal(false)}>
+                <Text style={styles.closeButtonText}>X</Text>
+              </Pressable>
+            </View>
+            <ScrollView contentContainerStyle={styles.modalContent}>
+              <FriendList game={game} setGame={setGame} />
+              <View style={styles.qrCodeContainer}>
+                {link && (
+                  <>
+                    <QRCode value={link} size={150} />
+                    <Text style={styles.entryCodeText}>Game Code: {game.entry_code}</Text>
+                    <Pressable
+                      style={[globalStyles.buttonContainer, { marginTop: 10 }]}
+                      onPress={copyToClipboard}
+                    >
+                      <Text style={globalStyles.buttonText}>Copy Link</Text>
+                    </Pressable>
+                  </>
+                )}
+              </View>
+            </ScrollView>
+          </Pressable>
+        </Pressable>
+      </Modal>
     </ScrollView>
   );
 };
@@ -208,12 +198,16 @@ const Lobby = ({ game, setGame, serverMessages }) => {
 export default Lobby;
 
 const styles = StyleSheet.create({
-  scrollContainer: {
-    flexGrow: 1,
-    padding: 20,
+  scrollView: {
+    flex: 1,
     backgroundColor: "#f0f0f0",
   },
+  scrollContainer: {
+    flexGrow: 1,
+  },
   container: {
+    paddingHorizontal: 20,
+    paddingVertical: 20,
     backgroundColor: "#f0f0f0",
   },
   header: {
@@ -223,41 +217,20 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     textAlign: "center",
   },
-  instructionText: {
-    fontSize: 18,
-    marginBottom: 10,
-    color: "#333333",
-    textAlign: "center",
-  },
-  qrCodeContainer: {
-    alignItems: "center",
+  buttonSection: {
+    flexDirection: "row",
+    justifyContent: "space-around",
     marginBottom: 20,
-    padding: 10,
-    borderColor: "#e74c3c",
-    borderWidth: 2,
-    borderRadius: 10,
-  },
-  entryCodeText: {
-    fontSize: 20,
-    marginVertical: 10,
-    fontWeight: "bold",
-    color: "#333333",
-  },
-  instructionsForSharing: {
-    fontSize: 16,
-    marginVertical: 5,
-    textAlign: "center",
-    color: "#333333",
-    paddingHorizontal: 10,
-    fontWeight: "600",
   },
   readyButtonContainer: {
     backgroundColor: "#3498db",
-    marginTop: 30,
+    flex: 1,
+    marginRight: 10,
   },
   inviteButtonContainer: {
     backgroundColor: "#e74c3c",
-    marginTop: 10,
+    flex: 1,
+    marginLeft: 10,
   },
   subHeader: {
     fontSize: 20,
@@ -309,7 +282,29 @@ const styles = StyleSheet.create({
     padding: 20,
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
-    elevation: 5,
+    maxHeight: "80%",
+  },
+  modalHeaderContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 10,
+  },
+  modalHeader: {
+    fontSize: 24,
+    color: "#e74c3c",
+    fontWeight: "bold",
+  },
+  closeButton: {
+    padding: 5,
+  },
+  closeButtonText: {
+    fontSize: 20,
+    fontWeight: "bold",
+    color: "#e74c3c",
+  },
+  modalContent: {
+    paddingBottom: 20,
   },
   modalTitle: {
     fontSize: 22,
@@ -339,8 +334,18 @@ const styles = StyleSheet.create({
   continueButton: {
     backgroundColor: "#3498db",
   },
-  closeButton: {
-    backgroundColor: "#e74c3c",
-    marginTop: 10,
+  qrCodeContainer: {
+    alignItems: "center",
+    marginBottom: 20,
+    padding: 10,
+    borderColor: "#e74c3c",
+    borderWidth: 2,
+    borderRadius: 10,
+  },
+  entryCodeText: {
+    fontSize: 20,
+    marginVertical: 10,
+    fontWeight: "bold",
+    color: "#333333",
   },
 });

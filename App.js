@@ -1,6 +1,5 @@
 import { StatusBar } from "expo-status-bar";
 import React, { useEffect, useState, useCallback } from "react";
-import { View, StyleSheet } from "react-native";
 import colors from "./config/colors";
 import "react-native-url-polyfill/auto";
 import HomeScreen from "./app/screens/home/HomeScreen";
@@ -98,9 +97,9 @@ export default function App() {
           initialRouteName={"Home"}
           screenOptions={{
             headerStyle: {
-              backgroundColor: colors.secondary,
+              backgroundColor: "#f0f0f0",
             },
-            headerTintColor: "#fff",
+            headerTintColor: colors.secondary,
             headerTitleStyle: {
               fontWeight: "bold",
             },
@@ -116,12 +115,3 @@ export default function App() {
     </UserContext.Provider>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#fff",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-});

@@ -12,6 +12,7 @@ import Animated, {
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const SWIPE_THRESHOLD = SCREEN_WIDTH * 0.3;
 const ROTATION_ANGLE = 10; // Adjust this for more or less rotation
+const VELOCITY_THRESHOLD = 800; // Flick velocity threshold
 
 const TinderCard = ({ children, onSwipe }) => {
   const translateX = useSharedValue(0);
@@ -31,13 +32,32 @@ const TinderCard = ({ children, onSwipe }) => {
     },
     onActive: (event, ctx) => {
       translateX.value = ctx.startX + event.translationX;
-      likeOpacity.value = translateX.value > 0 ? Math.min(1, translateX.value / (SCREEN_WIDTH * 0.5)) : 0;
-      nopeOpacity.value = translateX.value < 0 ? Math.min(1, -translateX.value / (SCREEN_WIDTH * 0.5)) : 0;
+      likeOpacity.value =
+        translateX.value > 0
+          ? Math.min(1, translateX.value / (SCREEN_WIDTH * 0.5))
+          : 0;
+      nopeOpacity.value =
+        translateX.value < 0
+          ? Math.min(1, -translateX.value / (SCREEN_WIDTH * 0.5))
+          : 0;
     },
-    onEnd: (_) => {
-      if (Math.abs(translateX.value) > SWIPE_THRESHOLD) {
+    onEnd: (event) => {
+      if (
+        Math.abs(translateX.value) > SWIPE_THRESHOLD ||
+        Math.abs(event.velocityX) > VELOCITY_THRESHOLD
+      ) {
         const swipeDirection = translateX.value > 0 ? 'right' : 'left';
-        runOnJS(handleSwipeComplete)(swipeDirection);
+        const finalX = translateX.value > 0 ? SCREEN_WIDTH : -SCREEN_WIDTH;
+        // Use a faster spring configuration for a quick exit
+        translateX.value = withSpring(
+          finalX,
+          { damping: 20, stiffness: 500, overshootClamping: true },
+          (finished) => {
+            if (finished) {
+              runOnJS(handleSwipeComplete)(swipeDirection);
+            }
+          }
+        );
       } else {
         translateX.value = withSpring(0);
         likeOpacity.value = withSpring(0);
@@ -47,12 +67,9 @@ const TinderCard = ({ children, onSwipe }) => {
   });
 
   const cardStyle = useAnimatedStyle(() => {
-    const rotate = translateX.value / SCREEN_WIDTH * ROTATION_ANGLE;
+    const rotate = (translateX.value / SCREEN_WIDTH) * ROTATION_ANGLE;
     return {
-      transform: [
-        { translateX: translateX.value },
-        { rotate: `${rotate}deg` },
-      ],
+      transform: [{ translateX: translateX.value }, { rotate: `${rotate}deg` }],
     };
   });
 
@@ -78,11 +95,7 @@ const TinderCard = ({ children, onSwipe }) => {
 
           {/* Card content */}
           <View style={styles.content} onTouchEnd={onPress}>
-            {flipped ? (
-              children[1]
-            ) : (
-              children[0]
-            )}
+            {flipped ? children[1] : children[0]}
           </View>
         </Animated.View>
       </PanGestureHandler>
@@ -104,10 +117,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderRadius: 10,
     shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
+    shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.25,
     shadowRadius: 3.84,
     elevation: 5,
@@ -123,17 +133,17 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     transform: [{ rotate: '-20deg' }],
     zIndex: 2,
-    backgroundColor: 'white', // Added white background
-    borderWidth: 2, // Added border width
-    borderColor: 'green', // Matching border color with text
-    padding: 8, // Added padding for better text visibility
-    borderRadius: 5, // Rounded corners for the border
-    overflow: 'hidden', // Ensures the background does not bleed outside the border radius
-    elevation: 4, // Add shadow effect for Android
-    shadowColor: '#000', // Shadow color
-    shadowOffset: { width: 0, height: 2 }, // Shadow direction and distance
-    shadowOpacity: 0.25, // Shadow opacity
-    shadowRadius: 3.84, // Shadow blur radius
+    backgroundColor: 'white',
+    borderWidth: 2,
+    borderColor: 'green',
+    padding: 8,
+    borderRadius: 5,
+    overflow: 'hidden',
+    elevation: 4,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
   },
   nope: {
     position: 'absolute',
@@ -144,17 +154,17 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     transform: [{ rotate: '20deg' }],
     zIndex: 2,
-    backgroundColor: 'white', // Added white background
-    borderWidth: 2, // Added border width
-    borderColor: 'red', // Matching border color with text
-    padding: 8, // Added padding for better text visibility
-    borderRadius: 5, // Rounded corners for the border
-    overflow: 'hidden', // Ensures the background does not bleed outside the border radius
-    elevation: 4, // Add shadow effect for Android
-    shadowColor: '#000', // Shadow color
-    shadowOffset: { width: 0, height: 2 }, // Shadow direction and distance
-    shadowOpacity: 0.25, // Shadow opacity
-    shadowRadius: 3.84, // Shadow blur radius
+    backgroundColor: 'white',
+    borderWidth: 2,
+    borderColor: 'red',
+    padding: 8,
+    borderRadius: 5,
+    overflow: 'hidden',
+    elevation: 4,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
   },
   content: {
     width: '100%',

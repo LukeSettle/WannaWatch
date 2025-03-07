@@ -3,13 +3,10 @@ import {
   Pressable,
   View,
   Text,
-  TextInput,
   StyleSheet,
   Keyboard,
-  ScrollView,
 } from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
-import { Picker } from "@react-native-picker/picker";
 import MultiSlider from "@ptomasroos/react-native-multi-slider";
 import { Formik } from "formik";
 import { upsertGame } from "../../data/backend_client";
@@ -18,6 +15,16 @@ import ProvidersSelection from "./ProvidersSelection";
 import GenresSelection from "./GenresSelection";
 import globalStyles from "../../../config/styles";
 import colors from "../../../config/colors";
+
+const languageOptions = [
+  { label: "English", value: "en" },
+  { label: "Spanish", value: "es" },
+  { label: "French", value: "fr" },
+  { label: "German", value: "de" },
+  { label: "Italian", value: "it" },
+  { label: "Japanese", value: "ja" },
+  { label: "Korean", value: "ko" },
+];
 
 const buildQuery = (values) => {
   const params = {
@@ -45,11 +52,12 @@ const buildQuery = (values) => {
   params["with_runtime.gte"] = values.runtimeRange[0];
   params["with_runtime.lte"] = values.runtimeRange[1];
 
-  if (values.sortBy) {
-    params.sort_by = values.sortBy;
-  }
-  if (values.language) {
-    params.with_original_language = values.language;
+  // Hard-coded to popularity descending.
+  params.sort_by = "popularity.desc";
+
+  if (values.language.length > 0) {
+    // Join selected languages with a pipe character.
+    params.with_original_language = values.language.join("|");
   }
 
   return {
@@ -98,7 +106,6 @@ const GameForm = ({ setGame, user }) => {
     <View style={styles.container}>
       {/* Scrollable filtering content */}
       <KeyboardAwareScrollView
-        style={styles.scrollView}
         contentContainerStyle={styles.scrollContainer}
         keyboardShouldPersistTaps="handled"
       >
@@ -112,11 +119,11 @@ const GameForm = ({ setGame, user }) => {
             initialValues={{
               providers: user?.providers || [],
               genres: [],
-              sortBy: "popularity.desc",
+              // sortBy is removed – always "popularity.desc"
               userScoreRange: [0, 10],
               releaseYearRange: [1980, currentYear],
               runtimeRange: [0, 240],
-              language: "",
+              language: [],
             }}
             onSubmit={(values) => handleSubmit(values)}
           >
@@ -150,32 +157,16 @@ const GameForm = ({ setGame, user }) => {
                   {step === 3 && (
                     <>
                       <Text style={globalStyles.label}>Advanced Filters</Text>
-                      <Text style={styles.advancedLabel}>Sort By:</Text>
-                      <View style={styles.pickerContainer}>
-                        <Picker
-                          selectedValue={values.sortBy}
-                          onValueChange={(val) =>
-                            setValues({ ...values, sortBy: val })
-                          }
-                          style={styles.picker}
-                        >
-                          <Picker.Item label="Popularity Descending" value="popularity.desc" />
-                          <Picker.Item label="Popularity Ascending" value="popularity.asc" />
-                          <Picker.Item label="Release Date Descending" value="release_date.desc" />
-                          <Picker.Item label="Release Date Ascending" value="release_date.asc" />
-                          <Picker.Item label="Vote Average Descending" value="vote_average.desc" />
-                          <Picker.Item label="Vote Average Ascending" value="vote_average.asc" />
-                        </Picker>
-                      </View>
 
+                      {/* Reactive User Score Slider */}
                       <Text style={styles.advancedLabel}>
-                        User Score: {values.userScoreRange[0]} - {values.userScoreRange[1]}
+                        User Rating: {values.userScoreRange[0]} - {values.userScoreRange[1]}
                       </Text>
                       <View style={styles.sliderContainer}>
                         <MultiSlider
                           values={values.userScoreRange}
                           sliderLength={280}
-                          onValuesChangeFinish={(sliderValues) =>
+                          onValuesChange={(sliderValues) =>
                             setValues({ ...values, userScoreRange: sliderValues })
                           }
                           min={0}
@@ -186,6 +177,7 @@ const GameForm = ({ setGame, user }) => {
                         />
                       </View>
 
+                      {/* Reactive Release Year Slider */}
                       <Text style={styles.advancedLabel}>
                         Release Year: {values.releaseYearRange[0]} - {values.releaseYearRange[1]}
                       </Text>
@@ -193,7 +185,7 @@ const GameForm = ({ setGame, user }) => {
                         <MultiSlider
                           values={values.releaseYearRange}
                           sliderLength={280}
-                          onValuesChangeFinish={(sliderValues) =>
+                          onValuesChange={(sliderValues) =>
                             setValues({ ...values, releaseYearRange: sliderValues })
                           }
                           min={1980}
@@ -204,6 +196,7 @@ const GameForm = ({ setGame, user }) => {
                         />
                       </View>
 
+                      {/* Reactive Runtime Slider */}
                       <Text style={styles.advancedLabel}>
                         Runtime (minutes): {values.runtimeRange[0]} - {values.runtimeRange[1]}
                       </Text>
@@ -211,7 +204,7 @@ const GameForm = ({ setGame, user }) => {
                         <MultiSlider
                           values={values.runtimeRange}
                           sliderLength={280}
-                          onValuesChangeFinish={(sliderValues) =>
+                          onValuesChange={(sliderValues) =>
                             setValues({ ...values, runtimeRange: sliderValues })
                           }
                           min={0}
@@ -222,24 +215,48 @@ const GameForm = ({ setGame, user }) => {
                         />
                       </View>
 
-                      <Text style={styles.advancedLabel}>Language:</Text>
-                      <View style={styles.pickerContainer}>
-                        <Picker
-                          selectedValue={values.language}
-                          onValueChange={(val) =>
-                            setValues({ ...values, language: val })
-                          }
-                          style={styles.picker}
-                        >
-                          <Picker.Item label="Any" value="" />
-                          <Picker.Item label="English" value="en" />
-                          <Picker.Item label="Spanish" value="es" />
-                          <Picker.Item label="French" value="fr" />
-                          <Picker.Item label="German" value="de" />
-                          <Picker.Item label="Italian" value="it" />
-                          <Picker.Item label="Japanese" value="ja" />
-                          <Picker.Item label="Korean" value="ko" />
-                        </Picker>
+                      {/* Multi-select Language */}
+                      <View style={styles.multiSelectContainer}>
+                        <Text style={styles.advancedLabel}>Languages:</Text>
+                        <View style={styles.languageOptionsContainer}>
+                          {languageOptions.map((option) => {
+                            const selected = values.language.includes(option.value);
+                            return (
+                              <Pressable
+                                key={option.value}
+                                onPress={() => {
+                                  if (selected) {
+                                    setValues({
+                                      ...values,
+                                      language: values.language.filter(
+                                        (val) => val !== option.value
+                                      ),
+                                    });
+                                  } else {
+                                    setValues({
+                                      ...values,
+                                      language: [...values.language, option.value],
+                                    });
+                                  }
+                                }}
+                                style={[
+                                  styles.languageOption,
+                                  selected && styles.languageOptionSelected,
+                                ]}
+                              >
+                                <Text
+                                  style={
+                                    selected
+                                      ? styles.languageOptionTextSelected
+                                      : styles.languageOptionText
+                                  }
+                                >
+                                  {option.label}
+                                </Text>
+                              </Pressable>
+                            );
+                          })}
+                        </View>
                       </View>
                     </>
                   )}
@@ -301,7 +318,7 @@ const styles = StyleSheet.create({
   },
   scrollContainer: {
     flexGrow: 1,
-    padding: "10%",
+    paddingBottom: "25%",
   },
   contentWrapper: {
     flex: 1,
@@ -332,7 +349,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
     borderRadius: 12,
     padding: 20,
-    marginBottom: 20,
+    margin: 20,
     overflow: "visible",
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
@@ -366,7 +383,7 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     backgroundColor: "#f0f0f0",
-    paddingVertical: 10,
+    paddingVertical: "10%",
     paddingHorizontal: 20,
     flexDirection: "row",
     justifyContent: "space-around",
@@ -375,5 +392,33 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.25,
     shadowRadius: 3.84,
     elevation: 5,
+  },
+  multiSelectContainer: {
+    marginTop: 10,
+  },
+  languageOptionsContainer: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    marginTop: 5,
+  },
+  languageOption: {
+    padding: 8,
+    borderWidth: 1,
+    borderColor: "#ccc",
+    borderRadius: 6,
+    marginRight: 5,
+    marginBottom: 5,
+  },
+  languageOptionSelected: {
+    backgroundColor: colors.secondary,
+    borderColor: colors.secondary,
+  },
+  languageOptionText: {
+    fontSize: 14,
+    color: "#333",
+  },
+  languageOptionTextSelected: {
+    fontSize: 14,
+    color: "#fff",
   },
 });

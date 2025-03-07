@@ -25,10 +25,10 @@ const CurrentGames = ({ navigation }) => {
 
   const handleMessage = (data) => {
     console.log('====================================');
-    console.log('data.message.message', data.message.message);
-    console.log('data.message == "game_index_updated"', data.message.message == "game_index_updated")
+    console.log('data.message.message', data.message?.message);
+    console.log('data.message == "game_index_updated"', data.message?.message == "game_index_updated")
     console.log('====================================');
-    if (data.message.message == "game_index_updated") {
+    if (data.message?.message == "game_index_updated") {
       console.log('====================================');
       console.log('loading games index');
       console.log('====================================');
