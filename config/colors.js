@@ -6,4 +6,8 @@ export default {
   flame: "#CF5C36",
   red: "#FE5F55",
   white: "#FFF",
+  background: "#f4f5f8",
+  surface: "#ffffff",
+  text: "#1a1d26",
+  textMuted: "#5c6378",
 };

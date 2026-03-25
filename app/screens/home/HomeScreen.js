@@ -9,9 +9,11 @@ import {
   Image,
   Alert,
   Modal,
+  ActivityIndicator,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import CurrentGames from "./CurrentGames";
 import { upsertUser } from "../../data/backend_client";
@@ -22,6 +24,7 @@ import { UserContext } from "../../contexts/UserContext";
 const WelcomeScreen = ({ navigation }) => {
   const { user, setUser, entryCode, setEntryCode, onLayoutRootView } = useContext(UserContext);
   const [showEditNameModal, setShowEditNameModal] = useState(false);
+  const insets = useSafeAreaInsets();
 
   useEffect(() => {
     if (user && entryCode) {
@@ -32,7 +35,8 @@ const WelcomeScreen = ({ navigation }) => {
   if (!user) {
     return (
       <View style={styles.loadingContainer}>
-        <Text style={styles.loadingText}>Loading...</Text>
+        <ActivityIndicator size="large" color={colors.secondary} />
+        <Text style={styles.loadingText}>Getting things ready…</Text>
       </View>
     );
   }
@@ -70,13 +74,15 @@ const WelcomeScreen = ({ navigation }) => {
 
   return (
     <LinearGradient
-      colors={[colors.primary, colors.secondary, colors.red]}
+      colors={["#5c7ab8", colors.secondary, "#1e2540"]}
       style={styles.background}
     >
-      {/* Top-right user name edit */}
       {hasUsername && (
-        <View style={styles.topRightContainer}>
-          <Pressable onPress={() => setShowEditNameModal(true)}>
+        <View style={[styles.topRightContainer, { top: insets.top + 8 }]}>
+          <Pressable
+            onPress={() => setShowEditNameModal(true)}
+            style={({ pressed }) => [styles.profilePill, pressed && { opacity: 0.9 }]}
+          >
             <Text style={styles.usernameText}>{user.username}</Text>
           </Pressable>
         </View>
@@ -93,7 +99,8 @@ const WelcomeScreen = ({ navigation }) => {
             source={require("../../assets/icon.png")}
             style={styles.image}
           />
-          <Text style={styles.headerText}>So... what do you wanna watch?</Text>
+          <Text style={styles.headerText}>What do you wanna watch?</Text>
+          <Text style={styles.tagline}>Pick filters, swipe together, find a match.</Text>
 
           {!hasUsername ? (
             <Formik initialValues={{ username: "" }} onSubmit={handleNameSubmit}>
@@ -123,7 +130,7 @@ const WelcomeScreen = ({ navigation }) => {
             <Formik initialValues={{ gameCode: entryCode }} onSubmit={() => {}}>
               {({ handleChange, handleBlur, values }) => (
                 <View style={styles.formContainer}>
-                  <Text style={styles.label}>Enter Game Code</Text>
+                  <Text style={styles.label}>Game code</Text>
                   <TextInput
                     style={styles.input}
                     onChangeText={handleChange("gameCode")}
@@ -131,6 +138,7 @@ const WelcomeScreen = ({ navigation }) => {
                     value={values.gameCode}
                     placeholder="e.g. ABC123"
                     placeholderTextColor="#aaa"
+                    autoCapitalize="characters"
                   />
                   <Pressable
                     style={({ pressed }) => [
@@ -139,17 +147,17 @@ const WelcomeScreen = ({ navigation }) => {
                     ]}
                     onPress={() => handleJoinGame(values.gameCode)}
                   >
-                    <Text style={globalStyles.buttonText}>Join Game</Text>
+                    <Text style={globalStyles.buttonText}>Join game</Text>
                   </Pressable>
                   <Pressable
                     style={({ pressed }) => [
                       globalStyles.buttonContainer,
+                      styles.secondaryBtn,
                       pressed && globalStyles.pressedButtonContainer,
-                      { marginTop: 10, backgroundColor: "#3498db" },
                     ]}
                     onPress={handleCreateGame}
                   >
-                    <Text style={globalStyles.buttonText}>Create Game</Text>
+                    <Text style={globalStyles.buttonText}>Start new game</Text>
                   </Pressable>
                 </View>
               )}
@@ -164,7 +172,7 @@ const WelcomeScreen = ({ navigation }) => {
             ]}
             onPress={() => navigation.navigate("Friends List")}
           >
-            <Text style={styles.linkText}>View Matches</Text>
+            <Text style={styles.linkText}>Likes & friends</Text>
           </Pressable>
         </View>
 
@@ -256,15 +264,21 @@ const styles = StyleSheet.create({
   },
   topRightContainer: {
     position: "absolute",
-    top: 40,
-    right: 20,
+    right: 16,
     zIndex: 10,
   },
+  profilePill: {
+    backgroundColor: "rgba(255,255,255,0.2)",
+    paddingVertical: 8,
+    paddingHorizontal: 14,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.35)",
+  },
   usernameText: {
-    fontSize: 16,
+    fontSize: 15,
     color: colors.white,
-    fontWeight: "bold",
-    textDecorationLine: "underline",
+    fontWeight: "700",
   },
   image: {
     width: 100,
@@ -275,17 +289,38 @@ const styles = StyleSheet.create({
   },
   headerText: {
     textAlign: "center",
-    marginBottom: 20,
+    marginBottom: 8,
     fontFamily: "Signika",
-    fontSize: 50,
-    color: colors.flame,
+    fontSize: 36,
+    color: "#fff",
+    paddingHorizontal: 16,
+    lineHeight: 42,
+  },
+  tagline: {
+    textAlign: "center",
+    color: "rgba(255,255,255,0.88)",
+    fontSize: 16,
+    lineHeight: 22,
+    marginBottom: 20,
+    paddingHorizontal: 24,
   },
   formContainer: {
-    backgroundColor: "#f0f0f0",
-    borderRadius: 10,
-    padding: 20,
+    backgroundColor: colors.surface,
+    borderRadius: 16,
+    padding: 22,
     margin: 20,
-    width: 300,
+    width: "100%",
+    maxWidth: 360,
+    alignSelf: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.15,
+    shadowRadius: 16,
+    elevation: 6,
+  },
+  secondaryBtn: {
+    marginTop: 12,
+    backgroundColor: colors.primary,
   },
   label: {
     fontSize: 16,
@@ -301,11 +336,14 @@ const styles = StyleSheet.create({
     fontSize: 18,
   },
   linkButton: {
-    marginTop: 10,
+    marginTop: 16,
+    backgroundColor: "rgba(255,255,255,0.22)",
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.4)",
   },
   linkText: {
     color: colors.white,
-    fontSize: 18,
+    fontSize: 17,
   },
   loadingContainer: {
     flex: 1,
@@ -314,8 +352,9 @@ const styles = StyleSheet.create({
     backgroundColor: "#f0f0f0",
   },
   loadingText: {
-    fontSize: 18,
-    color: "#333",
+    fontSize: 16,
+    color: colors.textMuted,
+    marginTop: 12,
   },
   modalBackground: {
     flex: 1,

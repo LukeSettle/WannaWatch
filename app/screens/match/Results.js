@@ -10,6 +10,7 @@ import {
 } from "react-native";
 import MovieDetails from "./MovieDetails";
 import colors from "../../../config/colors";
+import globalStyles from "../../../config/styles";
 
 const Results = ({ game, movies, requestKeepPlaying }) => {
   const { width } = useWindowDimensions();
@@ -75,8 +76,15 @@ const Results = ({ game, movies, requestKeepPlaying }) => {
           ))}
         </View>
       </ScrollView>
-      <Pressable style={styles.keepPlaying} onPress={requestKeepPlaying}>
-        <Text style={{ color: "white" }}>Keep playing</Text>
+      <Pressable
+        style={({ pressed }) => [
+          globalStyles.buttonContainer,
+          styles.keepPlaying,
+          pressed && globalStyles.pressedButtonContainer,
+        ]}
+        onPress={requestKeepPlaying}
+      >
+        <Text style={globalStyles.buttonText}>Keep playing</Text>
       </Pressable>
     </View>
   );
@@ -85,7 +93,7 @@ const Results = ({ game, movies, requestKeepPlaying }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#f0f0f0",
+    backgroundColor: colors.background,
   },
   contentContainer: {
     padding: 40,
@@ -94,7 +102,7 @@ const styles = StyleSheet.create({
   header: {
     fontSize: 22,
     marginVertical: 20,
-    color: "#333",
+    color: colors.text,
     fontWeight: "bold",
     textAlign: "center",
     width: "100%",
@@ -138,19 +146,11 @@ const styles = StyleSheet.create({
     color: "#666",
   },
   keepPlaying: {
-    backgroundColor: colors.primary,
-    padding: 20,
     marginBottom: 40,
-    justifyContent: "center",
-    alignItems: "center",
-    elevation: 3,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    borderRadius: 10,
-    width: "80%",
+    width: "85%",
+    maxWidth: 320,
     alignSelf: "center",
+    backgroundColor: colors.secondary,
   },
 });
 

@@ -15,11 +15,9 @@ const Movie = ({ movie, setUpdateMovieParams}) => {
     }
   };
 
-  const imageSource = () => {
-    return {
-      uri: `https://image.tmdb.org/t/p/original/${movie.poster_path}`,
-    };
-  };
+  const imageSource = () => ({
+    uri: `https://image.tmdb.org/t/p/w500/${movie.poster_path}`,
+  });
 
   return (
     <View style={styles.container}>
@@ -50,16 +48,22 @@ export default Movie;
 
 const styles = StyleSheet.create({
   container: {
-    position: 'absolute',
-    alignSelf: 'center',
+    position: "absolute",
+    alignSelf: "center",
     width: width * 0.9,
-    height: height * 0.7, // Adjust the height based on your preference
+    height: height * 0.68,
   },
   cardContainer: {
-    width: '100%',
-    height: '100%',
-    borderRadius: 10,
-    overflow: 'hidden',
+    width: "100%",
+    height: "100%",
+    borderRadius: 16,
+    overflow: "hidden",
+    backgroundColor: "#111",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.2,
+    shadowRadius: 16,
+    elevation: 8,
   },
   poster: {
     position: 'absolute',
