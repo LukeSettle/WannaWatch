@@ -3,10 +3,11 @@ import { StyleSheet } from 'react-native';
 const globalStyles = StyleSheet.create({
   buttonContainer: {
     backgroundColor: '#e74c3c',
-    borderRadius: 5,
+    borderRadius: 12,
     paddingVertical: 12,
-    paddingHorizontal: 12,
-    height: 50,
+    paddingHorizontal: 16,
+    minHeight: 50,
+    justifyContent: 'center',
   },
   enabledButtonContainer: {
     backgroundColor: '#e74c3c',

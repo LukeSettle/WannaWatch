@@ -9,23 +9,32 @@ import {
   StyleSheet,
   Modal,
   ScrollView,
+  Alert,
 } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { UserContext } from "../../contexts/UserContext";
 import { SocketContext } from "../../contexts/SocketContext";
 import globalStyles from "../../../config/styles";
 import FriendList from "./FriendList";
+import colors from "../../../config/colors";
+import * as Linking from "expo-linking";
 
 const Lobby = ({ game, setGame, serverMessages }) => {
   const { user } = useContext(UserContext);
   const { webSocket } = useContext(SocketContext);
+  const insets = useSafeAreaInsets();
   const [userReady, setUserReady] = useState(false);
   const [link, setLink] = useState("");
   const [showFriendsModal, setShowFriendsModal] = useState(false);
   const [showInviteAlert, setShowInviteAlert] = useState(false);
 
-  // Send "ready" message to the server
   const sendReadyMessage = () => {
     setUserReady(true);
+    if (!webSocket || webSocket.readyState !== WebSocket.OPEN) {
+      Alert.alert("Connection", "Not connected yet. Check your network and try again.");
+      setUserReady(false);
+      return;
+    }
     webSocket.send(
       JSON.stringify({
         command: "message",
@@ -38,7 +47,6 @@ const Lobby = ({ game, setGame, serverMessages }) => {
     );
   };
 
-  // When the user taps Ready, if they're alone, show an alert modal.
   const handleReadyPress = () => {
     if (game?.players?.length === 1) {
       setShowInviteAlert(true);
@@ -49,143 +57,174 @@ const Lobby = ({ game, setGame, serverMessages }) => {
 
   const copyToClipboard = async () => {
     await Clipboard.setStringAsync(link);
-    alert("Link copied to clipboard!");
+    Alert.alert("Copied", "Invite link copied to clipboard.");
   };
 
   useEffect(() => {
-    if (!game || !game.players) return;
-    // Update link with your custom scheme or URL
-    setLink(
-      `https://apps.apple.com/us/app/wannawatch/id6479348557?entry_code=${game.entry_code}`
-    );
-  }, [game]);
+    if (!game?.entry_code) return;
+    const schemeUrl = Linking.createURL("", {
+      queryParams: { entry_code: game.entry_code },
+    });
+    setLink(schemeUrl);
+  }, [game?.entry_code]);
+
+  useEffect(() => {
+    const me = game.players?.find((p) => p.user?.id === user?.id);
+    if (me?.ready_at) setUserReady(true);
+  }, [game, user?.id]);
 
   return (
-    <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContainer}>
-      {/* Main Content */}
+    <ScrollView
+      style={[styles.scrollView, { paddingTop: insets.top }]}
+      contentContainerStyle={styles.scrollContainer}
+    >
       <View style={styles.container}>
         <Text style={styles.header}>Lobby</Text>
+        <Text style={styles.subtitle}>
+          When everyone is ready, you will swipe together on the same stack.
+        </Text>
 
-        {/* Buttons Section */}
         <View style={styles.buttonSection}>
           <Pressable
             style={({ pressed }) => [
               globalStyles.buttonContainer,
-              styles.readyButtonContainer,
+              styles.readyButton,
               userReady && globalStyles.disabledButtonContainer,
               pressed && globalStyles.pressedButtonContainer,
             ]}
             onPress={handleReadyPress}
             disabled={userReady}
           >
-            <Text style={globalStyles.buttonText}>Ready</Text>
+            <Text style={globalStyles.buttonText}>{userReady ? "Ready" : "I'm ready"}</Text>
           </Pressable>
 
           <Pressable
-            style={[globalStyles.buttonContainer, styles.inviteButtonContainer]}
+            style={({ pressed }) => [
+              globalStyles.buttonContainer,
+              styles.inviteButton,
+              pressed && globalStyles.pressedButtonContainer,
+            ]}
             onPress={() => setShowFriendsModal(true)}
           >
-            <Text style={globalStyles.buttonText}>Add Friends</Text>
+            <Text style={globalStyles.buttonText}>Invite</Text>
           </Pressable>
         </View>
 
-        {/* Current Players */}
-        <Text style={styles.subHeader}>Current Players</Text>
-        <View style={styles.playersContainer}>
+        <Text style={styles.subHeader}>Players</Text>
+        <View style={styles.card}>
           <FlatList
+            scrollEnabled={false}
             data={game.players}
             renderItem={({ item }) => (
               <View style={styles.playerItem}>
-                <Text style={styles.playerText}>{item.user?.username}</Text>
+                <View style={styles.playerDot} />
+                <Text style={styles.playerText}>{item.user?.username || "Guest"}</Text>
+                {item.ready_at ? (
+                  <Text style={styles.readyBadge}>Ready</Text>
+                ) : null}
               </View>
             )}
-            keyExtractor={(item) => item.id}
+            keyExtractor={(item) => String(item.id)}
           />
         </View>
 
-        {/* Game Updates */}
-        <Text style={styles.subHeader}>Game Updates</Text>
-        <View style={styles.updatesContainer}>
-          <FlatList
-            data={[...serverMessages].reverse()}
-            renderItem={({ item }) => (
-              <View style={styles.messageContainer}>
-                <Text style={styles.messageText}>{item}</Text>
-              </View>
-            )}
-            keyExtractor={(item, index) => index.toString()}
-          />
+        <Text style={styles.subHeader}>Activity</Text>
+        <View style={styles.card}>
+          {serverMessages.length === 0 ? (
+            <Text style={styles.emptyActivity}>Waiting for updates…</Text>
+          ) : (
+            <FlatList
+              scrollEnabled={false}
+              data={[...serverMessages].reverse().slice(0, 12)}
+              renderItem={({ item }) => (
+                <View style={styles.messageRow}>
+                  <Text style={styles.messageText}>{item}</Text>
+                </View>
+              )}
+              keyExtractor={(item, index) => `${item}-${index}`}
+            />
+          )}
         </View>
       </View>
 
-      {/* Modal for "You're the only one here" Alert */}
-      <Modal visible={showInviteAlert} transparent animationType="slide">
+      <Modal visible={showInviteAlert} transparent animationType="fade">
         <View style={styles.modalBackground}>
-          <View style={styles.modalContainer}>
-            <Text style={styles.modalTitle}>Heads Up!</Text>
+          <View style={styles.modalCard}>
+            <Text style={styles.modalTitle}>Solo in the lobby?</Text>
             <Text style={styles.modalMessage}>
-              It looks like you're the only one here. Browsing movies solo can be fun,
-              but it's even better with friends! Share your game link, let someone scan
-              the QR code, or pass along the game code so your buddies can join. Would you
-              like to continue alone?
+              Swiping is more fun with someone else. Share your code or invite a friend — or continue
+              on your own.
             </Text>
-            <View style={styles.modalButtonContainer}>
+            <View style={styles.modalButtonColumn}>
               <Pressable
-                style={[
+                style={({ pressed }) => [
                   globalStyles.buttonContainer,
-                  styles.modalButton,
-                  styles.inviteButton,
+                  styles.modalPrimary,
+                  pressed && globalStyles.pressedButtonContainer,
+                  { marginBottom: 10 },
                 ]}
                 onPress={() => {
                   setShowInviteAlert(false);
                   setShowFriendsModal(true);
                 }}
               >
-                <Text style={globalStyles.buttonText}>Invite Friends</Text>
+                <Text style={globalStyles.buttonText}>Invite someone</Text>
               </Pressable>
               <Pressable
-                style={[
+                style={({ pressed }) => [
                   globalStyles.buttonContainer,
-                  styles.modalButton,
-                  styles.continueButton,
+                  styles.modalSecondary,
+                  pressed && globalStyles.pressedButtonContainer,
                 ]}
                 onPress={() => {
                   setShowInviteAlert(false);
                   sendReadyMessage();
                 }}
               >
-                <Text style={globalStyles.buttonText}>Continue Solo</Text>
+                <Text style={styles.modalSecondaryText}>Continue solo</Text>
               </Pressable>
             </View>
           </View>
         </View>
       </Modal>
 
-      {/* Slide-Up Modal for Friends & Invite Details */}
       <Modal visible={showFriendsModal} transparent animationType="slide">
-        <Pressable style={styles.modalBackground} onPress={() => setShowFriendsModal(false)}>
-          <Pressable style={styles.modalContainer} onPress={(e) => e.stopPropagation()}>
-            <View style={styles.modalHeaderContainer}>
-              <Text style={styles.modalHeader}>Add Friends</Text>
-              <Pressable style={styles.closeButton} onPress={() => setShowFriendsModal(false)}>
-                <Text style={styles.closeButtonText}>X</Text>
+        <Pressable style={styles.sheetBackdrop} onPress={() => setShowFriendsModal(false)}>
+          <Pressable style={styles.sheet} onPress={(e) => e.stopPropagation()}>
+            <View style={styles.sheetHandle} />
+            <View style={styles.sheetHeader}>
+              <Text style={styles.sheetTitle}>Invite</Text>
+              <Pressable
+                onPress={() => setShowFriendsModal(false)}
+                hitSlop={12}
+                style={styles.closeHit}
+              >
+                <Text style={styles.closeText}>Close</Text>
               </Pressable>
             </View>
-            <ScrollView contentContainerStyle={styles.modalContent}>
+            <ScrollView contentContainerStyle={styles.sheetBody}>
               <FriendList game={game} setGame={setGame} />
-              <View style={styles.qrCodeContainer}>
-                {link && (
+              <View style={styles.qrBlock}>
+                {link ? (
                   <>
-                    <QRCode value={link} size={150} />
-                    <Text style={styles.entryCodeText}>Game Code: {game.entry_code}</Text>
+                    <QRCode value={link} size={160} />
+                    <Text style={styles.codeLabel}>Game code</Text>
+                    <Text style={styles.entryCodeText}>{game.entry_code}</Text>
                     <Pressable
-                      style={[globalStyles.buttonContainer, { marginTop: 10 }]}
+                      style={({ pressed }) => [
+                        globalStyles.buttonContainer,
+                        { marginTop: 16, alignSelf: "stretch" },
+                        pressed && globalStyles.pressedButtonContainer,
+                      ]}
                       onPress={copyToClipboard}
                     >
-                      <Text style={globalStyles.buttonText}>Copy Link</Text>
+                      <Text style={globalStyles.buttonText}>Copy invite link</Text>
                     </Pressable>
+                    <Text style={styles.hint}>
+                      Friends can open the link on their phone to join this game.
+                    </Text>
                   </>
-                )}
+                ) : null}
               </View>
             </ScrollView>
           </Pressable>
@@ -200,152 +239,223 @@ export default Lobby;
 const styles = StyleSheet.create({
   scrollView: {
     flex: 1,
-    backgroundColor: "#f0f0f0",
+    backgroundColor: colors.background,
   },
   scrollContainer: {
     flexGrow: 1,
+    paddingBottom: 32,
   },
   container: {
     paddingHorizontal: 20,
-    paddingVertical: 20,
-    backgroundColor: "#f0f0f0",
+    paddingVertical: 16,
   },
   header: {
     fontSize: 28,
-    marginBottom: 20,
-    color: "#e74c3c",
-    fontWeight: "bold",
+    marginBottom: 8,
+    color: colors.text,
+    fontWeight: "700",
     textAlign: "center",
+  },
+  subtitle: {
+    fontSize: 15,
+    color: colors.textMuted,
+    textAlign: "center",
+    lineHeight: 22,
+    marginBottom: 24,
+    paddingHorizontal: 8,
   },
   buttonSection: {
     flexDirection: "row",
-    justifyContent: "space-around",
-    marginBottom: 20,
+    justifyContent: "space-between",
+    marginBottom: 24,
   },
-  readyButtonContainer: {
-    backgroundColor: "#3498db",
+  readyButton: {
     flex: 1,
-    marginRight: 10,
+    marginRight: 8,
+    backgroundColor: colors.secondary,
   },
-  inviteButtonContainer: {
-    backgroundColor: "#e74c3c",
+  inviteButton: {
     flex: 1,
-    marginLeft: 10,
+    marginLeft: 8,
+    backgroundColor: colors.primary,
   },
   subHeader: {
-    fontSize: 20,
+    fontSize: 17,
     marginBottom: 10,
-    color: "#333333",
-    fontWeight: "bold",
+    color: colors.text,
+    fontWeight: "600",
   },
-  playersContainer: {
+  card: {
     marginBottom: 20,
-    backgroundColor: "#fff",
-    borderRadius: 6,
-    padding: 10,
+    backgroundColor: colors.surface,
+    borderRadius: 14,
+    padding: 14,
     borderWidth: 1,
-    borderColor: "#ddd",
+    borderColor: "rgba(0,0,0,0.06)",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.06,
+    shadowRadius: 8,
+    elevation: 2,
   },
   playerItem: {
-    paddingVertical: 8,
+    paddingVertical: 10,
     borderBottomWidth: 1,
-    borderBottomColor: "#eee",
+    borderBottomColor: "rgba(0,0,0,0.06)",
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  playerDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: colors.quaternary,
+    marginRight: 10,
   },
   playerText: {
     fontSize: 16,
-    color: "#333",
+    color: colors.text,
+    flex: 1,
   },
-  updatesContainer: {
-    marginBottom: 20,
-    backgroundColor: "#fff",
-    borderRadius: 6,
-    padding: 10,
-    borderWidth: 1,
-    borderColor: "#ddd",
+  readyBadge: {
+    fontSize: 13,
+    fontWeight: "600",
+    color: colors.secondary,
+    backgroundColor: "rgba(41,51,92,0.08)",
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 8,
+    overflow: "hidden",
   },
-  messageContainer: {
-    paddingVertical: 5,
+  messageRow: {
+    paddingVertical: 8,
     borderBottomWidth: 1,
-    borderBottomColor: "#eee",
+    borderBottomColor: "rgba(0,0,0,0.05)",
   },
   messageText: {
-    fontSize: 14,
-    color: "#555",
+    fontSize: 15,
+    color: colors.textMuted,
+    lineHeight: 22,
+  },
+  emptyActivity: {
+    fontSize: 15,
+    color: colors.textMuted,
+    fontStyle: "italic",
+    paddingVertical: 8,
   },
   modalBackground: {
     flex: 1,
-    backgroundColor: "rgba(0,0,0,0.5)",
-    justifyContent: "flex-end",
+    backgroundColor: "rgba(0,0,0,0.45)",
+    justifyContent: "center",
+    padding: 24,
   },
-  modalContainer: {
-    backgroundColor: "#fff",
-    padding: 20,
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-    maxHeight: "80%",
-  },
-  modalHeaderContainer: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 10,
-  },
-  modalHeader: {
-    fontSize: 24,
-    color: "#e74c3c",
-    fontWeight: "bold",
-  },
-  closeButton: {
-    padding: 5,
-  },
-  closeButtonText: {
-    fontSize: 20,
-    fontWeight: "bold",
-    color: "#e74c3c",
-  },
-  modalContent: {
-    paddingBottom: 20,
+  modalCard: {
+    backgroundColor: colors.surface,
+    borderRadius: 16,
+    padding: 22,
   },
   modalTitle: {
-    fontSize: 22,
-    fontWeight: "bold",
+    fontSize: 20,
+    fontWeight: "700",
     marginBottom: 10,
-    color: "#e74c3c",
+    color: colors.text,
     textAlign: "center",
   },
   modalMessage: {
-    fontSize: 16,
-    color: "#333",
+    fontSize: 15,
+    color: colors.textMuted,
     marginBottom: 20,
     textAlign: "center",
+    lineHeight: 22,
   },
-  modalButtonContainer: {
+  modalButtonColumn: {},
+  modalPrimary: {
+    backgroundColor: colors.secondary,
+  },
+  modalSecondary: {
+    backgroundColor: "#e8eaef",
+  },
+  modalSecondaryText: {
+    textAlign: "center",
+    color: colors.text,
+    fontWeight: "700",
+    fontSize: 18,
+  },
+  sheetBackdrop: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.4)",
+    justifyContent: "flex-end",
+  },
+  sheet: {
+    backgroundColor: colors.surface,
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    maxHeight: "88%",
+    paddingBottom: 24,
+  },
+  sheetHandle: {
+    alignSelf: "center",
+    width: 40,
+    height: 4,
+    borderRadius: 2,
+    backgroundColor: "rgba(0,0,0,0.12)",
+    marginTop: 10,
+    marginBottom: 6,
+  },
+  sheetHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
-  },
-  modalButton: {
-    flex: 1,
-    marginHorizontal: 5,
-    paddingVertical: 10,
-  },
-  inviteButton: {
-    backgroundColor: "#e74c3c",
-  },
-  continueButton: {
-    backgroundColor: "#3498db",
-  },
-  qrCodeContainer: {
     alignItems: "center",
-    marginBottom: 20,
-    padding: 10,
-    borderColor: "#e74c3c",
-    borderWidth: 2,
-    borderRadius: 10,
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: "rgba(0,0,0,0.06)",
+  },
+  sheetTitle: {
+    fontSize: 20,
+    fontWeight: "700",
+    color: colors.text,
+  },
+  closeHit: {
+    paddingVertical: 4,
+    paddingHorizontal: 8,
+  },
+  closeText: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: colors.secondary,
+  },
+  sheetBody: {
+    padding: 20,
+    paddingBottom: 40,
+  },
+  qrBlock: {
+    alignItems: "center",
+    marginTop: 20,
+    padding: 20,
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: "rgba(0,0,0,0.08)",
+    backgroundColor: colors.background,
+  },
+  codeLabel: {
+    marginTop: 16,
+    fontSize: 14,
+    color: colors.textMuted,
+    fontWeight: "600",
   },
   entryCodeText: {
-    fontSize: 20,
-    marginVertical: 10,
-    fontWeight: "bold",
-    color: "#333333",
+    fontSize: 26,
+    marginTop: 4,
+    fontWeight: "800",
+    letterSpacing: 4,
+    color: colors.text,
+  },
+  hint: {
+    marginTop: 12,
+    fontSize: 13,
+    color: colors.textMuted,
+    textAlign: "center",
+    lineHeight: 18,
   },
 });

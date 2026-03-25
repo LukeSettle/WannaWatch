@@ -97,11 +97,18 @@ export default function App() {
           initialRouteName={"Home"}
           screenOptions={{
             headerStyle: {
-              backgroundColor: "#f0f0f0",
+              backgroundColor: colors.surface,
+              elevation: 0,
+              shadowOpacity: 0,
+              borderBottomWidth: 1,
+              borderBottomColor: "rgba(0,0,0,0.06)",
             },
             headerTintColor: colors.secondary,
             headerTitleStyle: {
-              fontWeight: "bold",
+              fontWeight: "700",
+              fontFamily: "Signika",
+              fontSize: 18,
+              color: colors.text,
             },
           }}
         >

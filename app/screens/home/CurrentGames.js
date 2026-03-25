@@ -24,17 +24,10 @@ const CurrentGames = ({ navigation }) => {
   }, [user]);
 
   const handleMessage = (data) => {
-    console.log('====================================');
-    console.log('data.message.message', data.message?.message);
-    console.log('data.message == "game_index_updated"', data.message?.message == "game_index_updated")
-    console.log('====================================');
-    if (data.message?.message == "game_index_updated") {
-      console.log('====================================');
-      console.log('loading games index');
-      console.log('====================================');
-      gamesIndex(user.id).then(setGames).catch(console.error);
+    if (data.message?.message === "game_index_updated") {
+      gamesIndex(user.id).then(setGames).catch(() => {});
     }
-  }
+  };
 
   return (
     <SocketProvider handleMessage={handleMessage} user={user}>

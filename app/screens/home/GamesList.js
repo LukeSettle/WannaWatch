@@ -1,7 +1,15 @@
 import React from "react";
 import { finishGame } from "../../data/backend_client";
-import { View, Text, StyleSheet, TouchableOpacity, FlatList, Alert } from "react-native";
+import {
+  View,
+  Text,
+  StyleSheet,
+  Pressable,
+  FlatList,
+  Alert,
+} from "react-native";
 import Ionicons from "react-native-vector-icons/Ionicons";
+import colors from "../../../config/colors";
 
 const GamesList = ({ games, setGames, setEntryCode, navigation }) => {
   const handleGamePress = (game) => {
@@ -10,43 +18,50 @@ const GamesList = ({ games, setGames, setEntryCode, navigation }) => {
   };
 
   const handleDeleteGame = (game) => {
-    Alert.alert(
-      "Confirm Deletion",
-      "Are you sure you want to delete this game?",
-      [
-        { text: "Cancel", style: "cancel" },
-        {
-          text: "Delete",
-          style: "destructive",
-          onPress: async () => {
-            try {
-              await finishGame(game.id);
-              setGames((prevGames) => prevGames.filter((g) => g.id !== game.id));
-            } catch (error) {
-              console.error("Error deleting game:", error);
-            }
+    Alert.alert("Remove game", "Remove this game from your list?", [
+      { text: "Cancel", style: "cancel" },
+      {
+        text: "Remove",
+        style: "destructive",
+        onPress: async () => {
+          try {
+            await finishGame(game.id);
+            setGames((prevGames) => prevGames.filter((g) => g.id !== game.id));
+          } catch {
+            // ignore
           }
         },
-      ]
-    );
+      },
+    ]);
   };
 
   const renderItem = ({ item }) => (
-    <TouchableOpacity style={styles.gameCard} onPress={() => handleGamePress(item)}>
+    <Pressable
+      style={({ pressed }) => [styles.gameCard, pressed && { opacity: 0.95 }]}
+      onPress={() => handleGamePress(item)}
+    >
       <View style={styles.gameHeader}>
-        <Text style={styles.gameTitle}>Game ID: {item.id}</Text>
-        <TouchableOpacity onPress={() => handleDeleteGame(item)}>
-          <Ionicons name="trash-outline" size={24} color="red" />
-        </TouchableOpacity>
+        <View>
+          <Text style={styles.gameTitle}>Code {item.entry_code}</Text>
+          <Text style={styles.gameSubtitle}>
+            {item.finished_at ? "Finished" : "In progress"}
+          </Text>
+        </View>
+        <Pressable
+          onPress={() => handleDeleteGame(item)}
+          hitSlop={10}
+          style={styles.trashHit}
+        >
+          <Ionicons name="trash-outline" size={22} color={colors.red} />
+        </Pressable>
       </View>
-      <Text style={styles.gameSubtitle}>Entry Code: {item.entry_code}</Text>
-      <Text style={styles.playersHeader}>Players:</Text>
+      <Text style={styles.playersHeader}>Players</Text>
       {item.players.map((player) => (
         <Text key={player.user.id} style={styles.playerName}>
           {player.user.username}
         </Text>
       ))}
-    </TouchableOpacity>
+    </Pressable>
   );
 
   if (games.length === 0) {
@@ -55,7 +70,7 @@ const GamesList = ({ games, setGames, setEntryCode, navigation }) => {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.currentGamesHeader}>Current Games</Text>
+      <Text style={styles.currentGamesHeader}>Your games</Text>
       <FlatList
         nestedScrollEnabled
         data={games}
@@ -74,53 +89,64 @@ const styles = StyleSheet.create({
     width: "100%",
   },
   listContent: {
-    paddingHorizontal: 10,
-    paddingBottom: 20,
+    paddingHorizontal: 12,
+    paddingBottom: 32,
   },
   gameCard: {
-    backgroundColor: "#f7f7f7",
-    padding: 15,
+    backgroundColor: "rgba(255,255,255,0.95)",
+    padding: 16,
     marginVertical: 8,
-    borderRadius: 10,
+    borderRadius: 14,
     width: "100%",
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.5)",
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 3,
-    elevation: 3,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.12,
+    shadowRadius: 10,
+    elevation: 4,
   },
   gameHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 5,
+    alignItems: "flex-start",
+    marginBottom: 10,
+  },
+  trashHit: {
+    padding: 4,
   },
   gameTitle: {
-    fontSize: 20,
-    fontWeight: "600",
-    color: "#333",
+    fontSize: 18,
+    fontWeight: "700",
+    color: colors.text,
   },
   gameSubtitle: {
-    fontSize: 16,
-    color: "#666",
-    marginBottom: 8,
+    fontSize: 14,
+    color: colors.textMuted,
+    marginTop: 2,
   },
   playersHeader: {
-    fontSize: 18,
-    fontWeight: "500",
-    marginBottom: 3,
-    color: "#333",
+    fontSize: 14,
+    fontWeight: "700",
+    marginBottom: 6,
+    color: colors.textMuted,
+    textTransform: "uppercase",
+    letterSpacing: 0.5,
   },
   playerName: {
-    fontSize: 16,
-    marginLeft: 10,
-    color: "#555",
+    fontSize: 15,
+    marginLeft: 4,
+    color: colors.text,
+    marginBottom: 2,
   },
   currentGamesHeader: {
-    fontSize: 24,
-    fontWeight: "bold",
+    fontSize: 22,
+    fontWeight: "800",
     color: "#fff",
-    marginBottom: 10,
+    marginBottom: 8,
     textAlign: "center",
+    textShadowColor: "rgba(0,0,0,0.25)",
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 4,
   },
 });

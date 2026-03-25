@@ -14,9 +14,7 @@ const Movie = ({ movieId }) => {
         console.log('====================================');
         setMovie(data.movieDetails);
       })
-      .catch((error) => {
-        console.log('error', error);
-      });
+      .catch(() => {});
   }
   , [movieId]);
 
@@ -30,7 +28,7 @@ const Movie = ({ movieId }) => {
       <View style={styles.imageContainer}>
         <Image
           style={styles.image}
-          source={{ uri: `https://image.tmdb.org/t/p/w500${movie.poster_path}` }}
+          source={{ uri: `https://image.tmdb.org/t/p/w500/${movie.poster_path}` }}
         />
       </View>
       <View style={styles.textContainer}>
@@ -45,14 +43,17 @@ const Movie = ({ movieId }) => {
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: '#ffffff',
-    marginBottom: 30,
+    backgroundColor: "#ffffff",
+    marginBottom: 20,
     elevation: 3,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.1,
-    shadowRadius: 5,
-    borderRadius: 10,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: "rgba(0,0,0,0.05)",
+    overflow: "hidden",
   },
   imageContainer: {
     borderTopLeftRadius: 10,

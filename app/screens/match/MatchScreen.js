@@ -4,7 +4,9 @@ import axios from "axios";
 import Results from "./Results";
 import Waiting from "./Waiting";
 import { keepPlaying } from "../../data/backend_client";
-import { Button, View, Text, StyleSheet } from "react-native";
+import { Pressable, View, Text, StyleSheet, ActivityIndicator } from "react-native";
+import colors from "../../../config/colors";
+import globalStyles from "../../../config/styles";
 
 const MatchScreen = ({ game, setGame, user }) => {
   const [fetchingMovies, setFetchingMovies] = useState(true);
@@ -46,16 +48,27 @@ const MatchScreen = ({ game, setGame, user }) => {
 
   const requestKeepPlaying = async () => {
     try {
-      await keepPlaying({ game_id: game.id, user_id: user.id });
+      const updated = await keepPlaying({ game_id: game.id, user_id: user.id });
+      if (updated) {
+        setGame(updated);
+      }
+      setMovies([]);
+      setUserFinishedMatching(false);
+      setNoMoreMovies(false);
     } catch (error) {
       console.log(error);
     }
   };
 
   useEffect(() => {
+    setMovies([]);
+    setNoMoreMovies(false);
+    setUserFinishedMatching(false);
+  }, [game.id]);
+
+  useEffect(() => {
     getMovies();
-    // Re-run whenever load_more_count changes
-  }, [game.load_more_count]);
+  }, [game.load_more_count, game.id]);
 
   useEffect(() => {
     const currentPlayer = game.players.find(
@@ -99,29 +112,53 @@ const MatchScreen = ({ game, setGame, user }) => {
           Try another game and adjust your filters, providers, and genres.
         </Text>
 
-        <Button
-          title="Create a new game"
-          onPress={() => {
-            setGame(null);
-          }}
-        />
+        <Pressable
+          style={({ pressed }) => [
+            globalStyles.buttonContainer,
+            pressed && globalStyles.pressedButtonContainer,
+            { marginTop: 20, minWidth: 220 },
+          ]}
+          onPress={() => setGame(null)}
+        >
+          <Text style={globalStyles.buttonText}>Create a new game</Text>
+        </Pressable>
       </View>
     );
   }
 
   // Otherwise, show the matching screen (once fetching is done)
   return (
-    <>
-      {!fetchingMovies && (
+    <View style={styles.matchRoot}>
+      {fetchingMovies ? (
+        <View style={styles.loadingWrap}>
+          <ActivityIndicator size="large" color={colors.secondary} />
+          <Text style={styles.loadingText}>Finding movies…</Text>
+        </View>
+      ) : (
         <Matching game={game} movies={movies} setMovies={setMovies} />
       )}
-    </>
+    </View>
   );
 };
 
 export default MatchScreen;
 
 const styles = StyleSheet.create({
+  matchRoot: {
+    flex: 1,
+    backgroundColor: "#f4f5f8",
+  },
+  loadingWrap: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 24,
+  },
+  loadingText: {
+    marginTop: 16,
+    fontSize: 16,
+    color: "#555",
+  },
   noMoviesContainer: {
     flex: 1,
     justifyContent: "center",
