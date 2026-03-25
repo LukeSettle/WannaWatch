@@ -34,8 +34,8 @@
       }
     },
     "extra": {
-      "API_URL": "https://629d-74-133-228-129.ngrok-free.app",
-      "WEBSOCKET_URL": "wss://wannawatch.azurewebsites.net/",
+      "API_URL": "http://localhost:3000",
+      "WEBSOCKET_URL": "",
       "eas": {
         "projectId": "27986aac-b8b0-4416-ba18-02704883e73f"
       }

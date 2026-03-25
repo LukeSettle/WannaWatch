@@ -19,16 +19,11 @@ const GameScreen = () => {
   };
 
   useEffect(() => {
-    if (entryCode) {
-      console.log('trying to find by code', entryCode);
-      const fetchGame = async () => {
-        const gameFromDb = await findGameFromEntryCode(entryCode);
-        setGame(gameFromDb);
-      }
-
-      fetchGame();
-    }
-  }, [entryCode])
+    if (!entryCode || !user?.id) return;
+    findGameFromEntryCode(entryCode, user.id)
+      .then(setGame)
+      .catch(() => {});
+  }, [entryCode, user?.id]);
 
   if (!game) {
     return <GameForm setGame={setGame} user={user} />;

@@ -5,7 +5,9 @@
     "android": "expo start --android",
     "ios": "expo start --ios",
     "web": "expo start --web",
-    "eject": "expo eject"
+    "eject": "expo eject",
+    "server": "npm start --prefix server",
+    "server:install": "npm install --prefix server"
   },
   "dependencies": {
     "@babel/preset-env": "^7.1.6",

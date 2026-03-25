@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import {
   Pressable,
   View,
@@ -9,7 +9,7 @@ import {
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import MultiSlider from "@ptomasroos/react-native-multi-slider";
 import { Formik } from "formik";
-import { upsertGame } from "../../data/backend_client";
+import { upsertGame, fetchUserTaste } from "../../data/backend_client";
 import Error from "../../components/shared/Error";
 import ProvidersSelection from "./ProvidersSelection";
 import GenresSelection from "./GenresSelection";
@@ -26,10 +26,11 @@ const languageOptions = [
   { label: "Korean", value: "ko" },
 ];
 
-const buildQuery = (values) => {
+const buildQuery = (values, tasteGenreIds = []) => {
   const params = {
     with_origin_country: "US",
-    page: Math.floor(Math.random() * 5) + 1,
+    page: Math.floor(Math.random() * 8) + 1,
+    "vote_count.gte": 80,
   };
 
   if (values.providers.length > 0) {
@@ -38,9 +39,10 @@ const buildQuery = (values) => {
   }
   if (values.genres.length > 0) {
     params.with_genres = values.genres.join("|");
+  } else if (tasteGenreIds.length > 0) {
+    params.with_genres = tasteGenreIds.slice(0, 6).join("|");
   }
 
-  // Using the range arrays:
   params["vote_average.gte"] = values.userScoreRange[0];
   params["vote_average.lte"] = values.userScoreRange[1];
 
@@ -52,11 +54,12 @@ const buildQuery = (values) => {
   params["with_runtime.gte"] = values.runtimeRange[0];
   params["with_runtime.lte"] = values.runtimeRange[1];
 
-  // Hard-coded to popularity descending.
-  params.sort_by = "popularity.desc";
+  params.sort_by =
+    tasteGenreIds.length > 0 && values.genres.length === 0
+      ? "vote_average.desc"
+      : "popularity.desc";
 
   if (values.language.length > 0) {
-    // Join selected languages with a pipe character.
     params.with_original_language = values.language.join("|");
   }
 
@@ -80,11 +83,19 @@ const GameForm = ({ setGame, user }) => {
   const currentYear = new Date().getFullYear();
   const [error, setError] = useState(null);
   const [step, setStep] = useState(1);
+  const [tasteGenreIds, setTasteGenreIds] = useState([]);
   const formikRef = useRef();
+
+  useEffect(() => {
+    if (!user?.id) return;
+    fetchUserTaste(user.id).then((t) => {
+      setTasteGenreIds(Array.isArray(t.topGenreIds) ? t.topGenreIds : []);
+    });
+  }, [user?.id]);
 
   const handleSubmit = async (values) => {
     Keyboard.dismiss();
-    const query = buildQuery(values);
+    const query = buildQuery(values, tasteGenreIds);
     const gameParams = {
       entry_code: generateShortCode(),
       query: JSON.stringify(query),
@@ -189,7 +200,7 @@ const GameForm = ({ setGame, user }) => {
                             setValues({ ...values, releaseYearRange: sliderValues })
                           }
                           min={1980}
-                          max={2025}
+                          max={currentYear}
                           step={1}
                           selectedStyle={{ backgroundColor: colors.secondary }}
                           unselectedStyle={{ backgroundColor: "#ccc" }}

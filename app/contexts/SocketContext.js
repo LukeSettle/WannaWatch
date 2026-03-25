@@ -1,51 +1,67 @@
-import React, { createContext, useEffect, useState } from 'react';
-import PropTypes from 'prop-types';
+import React, { createContext, useEffect, useRef, useState } from "react";
+import PropTypes from "prop-types";
+import { getWebSocketBaseUrl } from "../config/api";
 
 const SocketContext = createContext({ webSocket: null });
 
 const SocketProvider = ({ handleMessage, user, game, children }) => {
-  // const WS_BASE_URL = `http://localhost:3000/cable?user_id=${user.id}`;
-  const WS_BASE_URL = `https://wanna-watch-rails.onrender.com/cable?user_id=${user.id}`;
   const [webSocket, setWebSocket] = useState();
+  const handleMessageRef = useRef(handleMessage);
+  handleMessageRef.current = handleMessage;
 
   useEffect(() => {
-    const ws = new WebSocket(WS_BASE_URL);
+    if (!user?.id) {
+      return undefined;
+    }
 
-    ws.onopen = () => {
-      console.log('Connected to the server');
-      if (game) {
-        console.log('====================================');
-        console.log('connecting to GameChannel');
-        console.log('====================================');
-        ws.send(JSON.stringify({ command: "subscribe", identifier: JSON.stringify({ channel: "GameChannel", game_id: game.id }) }));
+    const base = getWebSocketBaseUrl();
+    const wsUrl = `${base}/cable?user_id=${user.id}`;
+    const ws = new WebSocket(wsUrl);
+
+    const subscribe = () => {
+      if (game?.id) {
+        ws.send(
+          JSON.stringify({
+            command: "subscribe",
+            identifier: JSON.stringify({
+              channel: "GameChannel",
+              game_id: game.id,
+            }),
+          })
+        );
       } else {
-        console.log('====================================');
-        console.log('connecting to UserGamesChannel');
-        console.log('====================================');
-        ws.send(JSON.stringify({ command: "subscribe", identifier: JSON.stringify({ channel: "UserGamesChannel" }) }));
+        ws.send(
+          JSON.stringify({
+            command: "subscribe",
+            identifier: JSON.stringify({ channel: "UserGamesChannel" }),
+          })
+        );
       }
     };
 
-    ws.onclose = (e) => {
-      console.log('Disconnected. Check internet or server.', e);
-    };
-
-    ws.onerror = (e) => {
-      console.log(e.message);
+    ws.onopen = () => {
+      subscribe();
     };
 
     ws.onmessage = (e) => {
-      const data = JSON.parse(e.data);
-      handleMessage(data);
+      try {
+        const data = JSON.parse(e.data);
+        handleMessageRef.current(data);
+      } catch {
+        // ignore malformed frames
+      }
     };
+
+    ws.onclose = () => {};
+
+    ws.onerror = () => {};
 
     setWebSocket(ws);
 
     return () => {
       ws.close();
-      console.log('WebSocket connection closed');
     };
-  }, []);
+  }, [user?.id, game?.id]);
 
   return (
     <SocketContext.Provider value={{ webSocket }}>{children}</SocketContext.Provider>
@@ -54,6 +70,9 @@ const SocketProvider = ({ handleMessage, user, game, children }) => {
 
 SocketProvider.propTypes = {
   children: PropTypes.node,
+  handleMessage: PropTypes.func,
+  user: PropTypes.object,
+  game: PropTypes.object,
 };
 
 export { SocketContext, SocketProvider };
