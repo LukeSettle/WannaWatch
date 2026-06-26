@@ -1,6 +1,7 @@
 import React, { useContext, useState, useEffect } from "react";
 import QRCode from "react-native-qrcode-svg";
 import * as Clipboard from "expo-clipboard";
+import * as Linking from "expo-linking";
 import {
   Pressable,
   FlatList,
@@ -54,9 +55,8 @@ const Lobby = ({ game, setGame, serverMessages }) => {
 
   useEffect(() => {
     if (!game || !game.players) return;
-    // Update link with your custom scheme or URL
     setLink(
-      `https://apps.apple.com/us/app/wannawatch/id6479348557?entry_code=${game.entry_code}`
+      Linking.createURL("", { queryParams: { entry_code: game.entry_code } })
     );
   }, [game]);
 
