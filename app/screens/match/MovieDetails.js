@@ -9,7 +9,7 @@ import {
   Platform,
   UIManager
 } from "react-native";
-import Ionicons from "react-native-vector-icons/Ionicons";
+import Ionicons from "@expo/vector-icons/Ionicons";
 import justwatch_logo from "../../assets/justwatch_logo.png";
 import PROVIDERS from "../../../config/providers";
 import { fetchMovieDetails } from "../../data/movie_api";

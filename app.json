@@ -33,6 +33,15 @@
         "backgroundColor": "#FFFFFF"
       }
     },
+    "web": {
+      "bundler": "metro",
+      "favicon": "./app/assets/icon.png",
+      "name": "WannaWatch",
+      "shortName": "WannaWatch",
+      "description": "Choose what to watch on date night with your friends.",
+      "themeColor": "#e74c3c",
+      "backgroundColor": "#ffffff"
+    },
     "extra": {
       "API_URL": "https://629d-74-133-228-129.ngrok-free.app",
       "WEBSOCKET_URL": "wss://wannawatch.azurewebsites.net/",

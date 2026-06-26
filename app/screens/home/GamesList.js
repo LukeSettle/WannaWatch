@@ -1,7 +1,7 @@
 import React from "react";
 import { finishGame } from "../../data/backend_client";
 import { View, Text, StyleSheet, TouchableOpacity, FlatList, Alert } from "react-native";
-import Ionicons from "react-native-vector-icons/Ionicons";
+import Ionicons from "@expo/vector-icons/Ionicons";
 
 const GamesList = ({ games, setGames, setEntryCode, navigation }) => {
   const handleGamePress = (game) => {

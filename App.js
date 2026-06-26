@@ -1,3 +1,4 @@
+import "react-native-gesture-handler";
 import { StatusBar } from "expo-status-bar";
 import React, { useEffect, useState, useCallback } from "react";
 import colors from "./config/colors";
@@ -8,7 +9,7 @@ import FriendsListScreen from "./app/screens/list/FriendsListScreen";
 import SharedMoviesScreen from "./app/screens/list/SharedMoviesScreen";
 import { NavigationContainer } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
-import * as SecureStore from "expo-secure-store";
+import { getItem, setItem } from "./app/utils/secureStorage";
 import "react-native-get-random-values";
 import { v4 as uuidv4 } from "uuid";
 import { UserContext } from "./app/contexts/UserContext";
@@ -65,10 +66,10 @@ export default function App() {
 
   useEffect(() => {
     const findOrCreateDeviceId = async () => {
-      const id = await SecureStore.getItemAsync("deviceId");
+      const id = await getItem("deviceId");
       if (!id) {
         const newId = uuidv4();
-        await SecureStore.setItemAsync("deviceId", newId);
+        await setItem("deviceId", newId);
         setDeviceId(newId);
       } else {
         setDeviceId(id);
