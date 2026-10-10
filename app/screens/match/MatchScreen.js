@@ -1,9 +1,10 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import Matching from "./Matching";
-import axios from "axios";
 import Results from "./Results";
 import Waiting from "./Waiting";
 import { keepPlaying } from "../../data/backend_client";
+import { buildRound } from "../../data/recommendations";
+import { loadOpinions, shouldSkipMovie } from "../../data/movie_opinions";
 import { Button, View, Text, StyleSheet } from "react-native";
 
 const MatchScreen = ({ game, setGame, user }) => {
@@ -12,30 +13,29 @@ const MatchScreen = ({ game, setGame, user }) => {
   const [userFinishedMatching, setUserFinishedMatching] = useState(false);
   const [noMoreMovies, setNoMoreMovies] = useState(false);
 
-  const options = () => {
-    const parsedOptions = JSON.parse(game.query);
-    return {
-      ...parsedOptions,
-      params: {
-        ...parsedOptions.params,
-        // Use load_more_count to pick a new page
-        page: (parsedOptions.params.page + game.load_more_count) % 500 + 1,
-      },
-    };
-  };
+  const dealtIds = useRef(new Set());
+  const likedIdsByPlayer = useRef({});
 
   const getMovies = async () => {
     setFetchingMovies(true);
     try {
-      const response = await axios.request(options());
-      const json = response.data.results; // array of movies
+      const nextRound = await buildRound({
+        query: JSON.parse(game.query),
+        round: game.load_more_count,
+        likedIdsByPlayer: Object.values(likedIdsByPlayer.current),
+        dealtIds: dealtIds.current,
+      });
+      nextRound.forEach((movie) => dealtIds.current.add(movie.id));
 
-      if (json.length === 0) {
-        // No more matching movies
+      const opinions = await loadOpinions();
+      const unseen = nextRound.filter((movie) => !shouldSkipMovie(opinions, movie.id));
+      const deck = unseen.length > 0 ? unseen : nextRound;
+
+      if (deck.length === 0) {
         setNoMoreMovies(true);
       } else {
-        // Append new movies to the existing list
-        setMovies((prev) => [...prev, ...json]);
+        // The last movie in the list is the top card, so the best pick goes last.
+        setMovies((prev) => [...prev, ...deck.reverse()]);
       }
     } catch (error) {
       console.log(error);
@@ -53,8 +53,15 @@ const MatchScreen = ({ game, setGame, user }) => {
   };
 
   useEffect(() => {
+    game.players.forEach((player) => {
+      const previous = likedIdsByPlayer.current[player.user.id] || [];
+      const latest = player.liked_movie_ids || [];
+      likedIdsByPlayer.current[player.user.id] = [...new Set([...previous, ...latest])];
+    });
+  }, [game]);
+
+  useEffect(() => {
     getMovies();
-    // Re-run whenever load_more_count changes
   }, [game.load_more_count]);
 
   useEffect(() => {
