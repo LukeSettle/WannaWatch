@@ -1,15 +1,25 @@
 import React, { useContext, useEffect, useState } from "react";
 import {
   View,
+  Text,
+  Pressable,
   StyleSheet,
 } from "react-native";
 import Movie from "./Movie";
+import WatchedPrompt from "./WatchedPrompt";
 import { SocketContext } from "../../contexts/SocketContext";
+import { saveOpinion } from "../../data/movie_opinions";
 import Ionicons from '@expo/vector-icons/Ionicons';
 
 const Matching = ({ game, movies, setMovies }) => {
   const [updateMovieParams, setUpdateMovieParams] = useState(null);
+  const [watchedMovie, setWatchedMovie] = useState(null);
   const { webSocket } = useContext(SocketContext);
+
+  const answerWatched = (liked) => {
+    setUpdateMovieParams({ id: watchedMovie.id, liked, watched: true });
+    setWatchedMovie(null);
+  };
 
   const nopeCurrentMovie = () => {
     setUpdateMovieParams({ id: filteredMovies().slice(-1)[0].id, liked: false });
@@ -33,6 +43,11 @@ const Matching = ({ game, movies, setMovies }) => {
 
   useEffect(() => {
     if (!updateMovieParams) return;
+
+    saveOpinion(updateMovieParams.id, {
+      liked: updateMovieParams.liked,
+      watched: Boolean(updateMovieParams.watched),
+    });
 
     const updatedMovies = movies.map((movie) =>
       movie.id === updateMovieParams.id
@@ -83,8 +98,20 @@ const Matching = ({ game, movies, setMovies }) => {
       </View>
       <View style={styles.directions}>
         <Ionicons onPress={nopeCurrentMovie} name="arrow-back" size={32} color="red" />
+        <Pressable
+          style={styles.watchedButton}
+          onPress={() => setWatchedMovie(filteredMovies().slice(-1)[0])}
+        >
+          <Ionicons name="eye-outline" size={24} color="#333" />
+          <Text style={styles.watchedText}>Already watched</Text>
+        </Pressable>
         <Ionicons onPress={likeCurrentMovie} name="arrow-forward" size={32} color="green" />
       </View>
+      <WatchedPrompt
+        movie={watchedMovie}
+        onAnswer={answerWatched}
+        onCancel={() => setWatchedMovie(null)}
+      />
     </View>
   );
 };
@@ -109,5 +136,12 @@ const styles = StyleSheet.create({
     marginTop: '20%',
     marginLeft: '20%',
     marginRight: '20%',
+  },
+  watchedButton: {
+    alignItems: 'center',
+  },
+  watchedText: {
+    fontSize: 12,
+    color: '#333',
   },
 });

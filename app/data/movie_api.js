@@ -54,4 +54,16 @@ const fetchGenres = async () => {
   }
 }
 
-export { fetchMovieDetails, fetchGenres, fetchProviders };
+const discoverMovies = async (params, page) => {
+  const url = 'https://api.themoviedb.org/3/discover/movie';
+  const response = await axios.get(url, { params: { ...params, api_key: apiKey, page } });
+  return response.data;
+};
+
+const fetchMovieWithKeywords = async (movieId) => {
+  const url = `https://api.themoviedb.org/3/movie/${movieId}`;
+  const response = await axios.get(url, { params: { api_key: apiKey, append_to_response: 'keywords' } });
+  return response.data;
+};
+
+export { fetchMovieDetails, fetchGenres, fetchProviders, discoverMovies, fetchMovieWithKeywords };
